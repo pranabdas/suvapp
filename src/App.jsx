@@ -1,14 +1,20 @@
-import React from 'react';
-import HeaderText from "./components/HeaderText.jsx"
-import UploadDataFile from "./components/UploadDataFile.jsx"
+import React from "react";
+import DataUploader from "./components/DataUploader.jsx";
 
 function App() {
-    return(
-      <div> 
-        < HeaderText />
-        < UploadDataFile />
-      </div>
-    )
-  }
+  return (
+    <>
+      <DataUploader />
 
-export default App
+      <br />
+      <br />
+      <footer>
+        © Copyright {new Date().getFullYear().toString()}{" "}
+        <a href="https://pranabdas.github.io/">Pranab Das</a>. All rights
+        reserved.
+      </footer>
+    </>
+  );
+}
+
+export default App;
