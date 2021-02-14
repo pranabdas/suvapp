@@ -1,13 +1,14 @@
 import React from "react";
-import { CSVLink } from "react-csv";
+import Plot from "react-plotly.js";
 
-function DataUploader() {
+function PlotComponent() {
   const [scan, setScan] = React.useState(-1);
   const [content, setContent] = React.useState([]);
-  const [data, setData] = React.useState([]);
-  const [status, setStatus] = React.useState("Not processed");
+  const [colX, setColX] = React.useState(0);
+  const [colY, setColY] = React.useState(0);
+  const [plotData, setPlotData] = React.useState([]);
 
-  const ProcessData = () => {
+  const MakePlot = () => {
     // find scan id and corresponding line numbers
     let scanId = [];
     let lineId = [];
@@ -48,8 +49,25 @@ function DataUploader() {
         data[ii][jj] = parseFloat(data[ii][jj]);
       }
     }
-    setData(data);
-    setStatus("Processing done");
+
+    let dataX = [];
+    let dataY = [];
+
+    for (let ii = 0; ii < data.length; ii++) {
+      dataX.push(data[ii][colX]);
+    }
+
+    for (let ii = 0; ii < data.length; ii++) {
+      dataY.push(data[ii][colY]);
+    }
+
+    setPlotData([
+      {
+        x: dataX,
+        y: dataY,
+        type: "line",
+      },
+    ]);
   };
 
   const HandleUpload = (e) => {
@@ -82,19 +100,37 @@ function DataUploader() {
             setScan(parseInt(e.target.value));
           }}
         ></input>
+
+        <p>Set x-column</p>
+        <input
+          type="number"
+          id="colX"
+          name="colX"
+          value={colX}
+          onChange={(e) => {
+            setColX(parseInt(e.target.value));
+          }}
+        ></input>
+
+        <p>Set y-column</p>
+        <input
+          type="number"
+          id="colY"
+          name="colY"
+          value={colY}
+          onChange={(e) => {
+            setColY(parseInt(e.target.value));
+          }}
+        ></input>
       </form>
 
       <p>
-        <button onClick={ProcessData} className="btn">
-          Process data
+        <button onClick={MakePlot} className="btn">
+          Make plot
         </button>
-        ({status})
       </p>
+      <Plot data={plotData} layout={{ width: "auto", height: "auto" }} />
 
-      <br />
-      <h4>
-        &nbsp;&nbsp;<CSVLink data={data}>Download CSV</CSVLink>
-      </h4>
       <button onClick={() => window.location.reload()} className="btn">
         Clear All
       </button>
@@ -102,4 +138,4 @@ function DataUploader() {
   );
 }
 
-export default DataUploader;
+export default PlotComponent;

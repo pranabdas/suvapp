@@ -1,11 +1,12 @@
 import React from "react";
 import DataUploader from "./components/DataUploader.jsx";
+// import PlotComponent from "./components/PlotComponent.jsx";
 
 function App() {
   return (
     <>
       <DataUploader />
-
+      {/* <PlotComponent /> */}
       <br />
       <br />
       <footer>
