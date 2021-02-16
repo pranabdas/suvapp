@@ -221,15 +221,15 @@ p {
   background: var(--clr-white);
   max-width: var(--max-width);
   margin: 0 auto;
-  margin-bottom: 1rem;
-  padding: 1rem 1rem;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0.25rem;
   border-radius: var(--radius);
 }
 .form input {
   background: var(--clr-grey-10);
   border-color: transparent;
   border-radius: var(--radius);
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.25rem;
   font-size: medium;
   /* width: 180px; */
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
@@ -360,4 +360,29 @@ select {
 .fineprint {
   font-size: 0.5rem;
   color: maroon;
+}
+
+.dwbtn {
+  display: inline-block;
+  background: var(--clr-primary-5);
+  color: var(--clr-white);
+  padding: 0;
+  border-radius: var(--radius);
+  border-color: transparent;
+  text-transform: capitalize;
+  font-size: 1.2rem;
+  letter-spacing: var(--spacing);
+  margin-top: 2rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.dwbtn:hover {
+  background: var(--clr-primary-1);
+  color: var(--clr-primary-5);
+}
+
+.dwbtn a {
+  color: white;
 }
