@@ -5,13 +5,42 @@ function DataUploader() {
   const [scan, setScan] = React.useState(-1);
   const [content, setContent] = React.useState([]);
   const [data, setData] = React.useState([]);
-  const [status, setStatus] = React.useState("Not processed");
+  const [status, setStatus] = React.useState("No data file uploaded");
   const [colNames, setColNames] = React.useState([]);
-  const [energyCol, setEnergyCol] = React.useState(0);
+  const [xCol, setXCol] = React.useState(0);
   const [ICol, setICol] = React.useState(1);
   const [I0Col, setI0Col] = React.useState(-1);
 
   const ProcessData = () => {
+    const t0 = performance.now();
+
+    // check content exists
+    if (content.length < 1) {
+      setStatus("Input file is empty!");
+      return;
+    }
+
+    // check validity of inputs 
+    if (!scan && scan !== 0) {
+      setStatus("Please enter a valid X-col index!");
+      return;
+    }
+
+    if ((!xCol && xCol !== 0) || xCol < 0) {
+      setStatus("Please enter a valid X-col index!");
+      return;
+    }
+
+    if ((!ICol && ICol !== 0) || ICol < 0) {
+      setStatus("Please enter a valid intensity-col index!");
+      return;
+    }
+
+    if ((!I0Col && I0Col !== 0) || I0Col < -1) {
+      setStatus("Please enter a valid I_0-col index!");
+      return;
+    }
+
     // find scan id and corresponding line numbers
     let scanId = [];
     let lineId = [];
@@ -28,6 +57,12 @@ function DataUploader() {
       id = scanId.length - 1;
     } else {
       id = scanId.indexOf(scan);
+    }
+
+    // check if the scan exists
+    if (content.length && id === -1) {
+      setStatus(`Scan number ${scan} not found.`);
+      return;
     }
 
     let lineStart = lineId[id];
@@ -62,17 +97,38 @@ function DataUploader() {
       }
     }
 
-    // export only Energy and I/I0
+    // check if data found
+    if (data.length < 1) {
+      setStatus("Empty data! Please check data file and inputs.");
+      return;
+    }
+
+    // check validity of column index
+    if (xCol > data[0].length - 1) {
+      setStatus("X-column index is out of range.");
+      return;
+    } else if (ICol > data[0].length - 1) {
+      setStatus("Intensity-column index is out of range.");
+      return;
+    } else if (I0Col > data[0].length - 1) {
+      setStatus("I_0-column index is out of range.");
+      return;
+    } else if (I0Col < -1) {
+      setStatus("I_0-column index is out of range.");
+      return;
+    }
+
+    // export desired columns 
     let newData = new Array(data.length);
 
     if (I0Col === -1) {
       for (let ii = 0; ii < data.length; ii++) {
-        newData[ii] = [data[ii][energyCol], data[ii][ICol].toExponential()];
+        newData[ii] = [data[ii][xCol], data[ii][ICol].toExponential()];
       }
     } else {
       for (let ii = 0; ii < data.length; ii++) {
         newData[ii] = [
-          data[ii][energyCol],
+          data[ii][xCol],
           (data[ii][ICol] / data[ii][I0Col]).toExponential(),
         ];
       }
@@ -80,10 +136,14 @@ function DataUploader() {
 
     setData(newData);
 
+    const t1 = performance.now();
+    // console.log("The processing took " + (t1 - t0) + " milliseconds.");
     if (data.length > 0) {
-      setStatus("Processing done");
-    } else {
-      setStatus("Empty data");
+      setStatus(
+        `Processed in < ${parseInt(
+          t1 - t0 + 1 + Math.random() * 10  // random number [0, 10] added
+        )} millisecond.`
+      );
     }
   };
 
@@ -94,6 +154,7 @@ function DataUploader() {
       const text = e.target.result;
       const content = text.split("\n");
       setContent(content);
+      setStatus("File uploaded");
     };
   };
 
@@ -124,11 +185,11 @@ function DataUploader() {
         </p>
         <input
           type="number"
-          id="energyCol"
-          name="energyCol"
-          value={energyCol}
+          id="xCol"
+          name="xCol"
+          value={xCol}
           onChange={(e) => {
-            setEnergyCol(parseInt(e.target.value));
+            setXCol(parseInt(e.target.value));
           }}
         ></input>
         <br />
@@ -185,9 +246,10 @@ function DataUploader() {
         <i>
           Your data columns will be listed bellow once processed. You can
           re-renter the columns above, and click <b>Process Data</b> button
-          again if you have chosen wrong columns. Note that column headers might
-          not correspond to actual data columns, please consult with beamline
-          personal about your data file format.
+          again if you have chosen wrong columns, or change the scan number to
+          process multiple scans from the same input file. Note that column
+          headers might not correspond to actual data columns, please consult
+          with beamline personal about your data file format.
         </i>
       </p>
       <p>
