@@ -20,7 +20,7 @@ function DataUploader() {
       return;
     }
 
-    // check validity of inputs 
+    // check validity of inputs
     if (!scan && scan !== 0) {
       setStatus("Please enter a valid X-col index!");
       return;
@@ -118,7 +118,7 @@ function DataUploader() {
       return;
     }
 
-    // export desired columns 
+    // export desired columns
     let newData = new Array(data.length);
 
     if (I0Col === -1) {
@@ -141,10 +141,27 @@ function DataUploader() {
     if (data.length > 0) {
       setStatus(
         `Processed in < ${parseInt(
-          t1 - t0 + 1 + Math.random() * 10  // random number [0, 10] added
+          t1 - t0 + 1 + Math.random() * 10 // random number [0, 10] added
         )} millisecond.`
       );
     }
+  };
+
+  const DownloadPlaintext = () => {
+    let downloadContent = "";
+
+    for (let ii = 0; ii < data.length; ii++) {
+      downloadContent = downloadContent.concat(
+        `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\n`
+      );
+    }
+
+    const element = document.createElement("a");
+    const file = new Blob([downloadContent], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "data.txt";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
   };
 
   const HandleUpload = (e) => {
@@ -230,16 +247,17 @@ function DataUploader() {
       <p>
         <i>
           It will export X (say, energy or angle) and Intensity columns (or I/I
-          <sub>0</sub>, if you have set I<sub>0</sub> index) to <b>.csv</b>{" "}
-          format, which can be read by other programs (virtually every plotting
-          software, spreadsheet software, and text editors can read <b>.csv</b>{" "}
-          file).
+          <sub>0</sub>, if you have set I<sub>0</sub> index) to <b>.csv</b> and{" "}
+          <b>.txt</b> plaintext formats.
         </i>
       </p>
 
       <h4>
         <button className="dwbtn">
           <CSVLink data={data}>Download CSV</CSVLink>
+        </button>
+        <button className="dwbtn" onClick={DownloadPlaintext}>
+          Download Plaintext
         </button>
       </h4>
       <p>
