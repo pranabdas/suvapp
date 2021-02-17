@@ -2,6 +2,8 @@ import React from "react";
 import { CSVLink } from "react-csv";
 
 function DataUploader() {
+  const [filename, setFilename] = React.useState("");
+  const [outFilename, SetOutFilename] = React.useState("");
   const [scan, setScan] = React.useState(-1);
   const [content, setContent] = React.useState([]);
   const [data, setData] = React.useState([]);
@@ -17,27 +19,34 @@ function DataUploader() {
     // check content exists
     if (content.length < 1) {
       setStatus("Input file is empty!");
+      setData([]);
+      setColNames([]);
       return;
     }
 
     // check validity of inputs
     if (!scan && scan !== 0) {
       setStatus("Please enter a valid X-col index!");
+      setData([]);
+      setColNames([]);
       return;
     }
 
     if ((!xCol && xCol !== 0) || xCol < 0) {
       setStatus("Please enter a valid X-col index!");
+      setData([]);
       return;
     }
 
     if ((!ICol && ICol !== 0) || ICol < 0) {
       setStatus("Please enter a valid intensity-col index!");
+      setData([]);
       return;
     }
 
     if ((!I0Col && I0Col !== 0) || I0Col < -1) {
       setStatus("Please enter a valid I_0-col index!");
+      setData([]);
       return;
     }
 
@@ -55,6 +64,7 @@ function DataUploader() {
     let id;
     if (scan === -1) {
       id = scanId.length - 1;
+      setScan(scanId[scanId.length - 1]);
     } else {
       id = scanId.indexOf(scan);
     }
@@ -62,6 +72,8 @@ function DataUploader() {
     // check if the scan exists
     if (content.length && id === -1) {
       setStatus(`Scan number ${scan} not found.`);
+      setData([]);
+      setColNames([]);
       return;
     }
 
@@ -100,21 +112,26 @@ function DataUploader() {
     // check if data found
     if (data.length < 1) {
       setStatus("Empty data! Please check data file and inputs.");
+      setData([]);
       return;
     }
 
     // check validity of column index
     if (xCol > data[0].length - 1) {
       setStatus("X-column index is out of range.");
+      setData([]);
       return;
     } else if (ICol > data[0].length - 1) {
       setStatus("Intensity-column index is out of range.");
+      setData([]);
       return;
     } else if (I0Col > data[0].length - 1) {
       setStatus("I_0-column index is out of range.");
+      setData([]);
       return;
     } else if (I0Col < -1) {
       setStatus("I_0-column index is out of range.");
+      setData([]);
       return;
     }
 
@@ -140,31 +157,54 @@ function DataUploader() {
     // console.log("The processing took " + (t1 - t0) + " milliseconds.");
     if (data.length > 0) {
       setStatus(
-        `Processed in < ${parseInt(
+        `Success! Processed in < ${parseInt(
           t1 - t0 + 1 + Math.random() * 10 // random number [0, 10] added
         )} millisecond.`
       );
     }
+
+    if (
+      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
+        ".txt" ||
+      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
+        ".csv" ||
+      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
+        ".dat"
+    ) {
+      SetOutFilename(filename.slice(0, filename.length - 4) + "_scan_");
+    } else {
+      SetOutFilename(filename + "_scan_");
+    }
   };
 
   const DownloadPlaintext = () => {
-    let downloadContent = "";
+    if (data.length > 0) {
+      let downloadContent = "";
 
-    for (let ii = 0; ii < data.length; ii++) {
-      downloadContent = downloadContent.concat(
-        `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\n`
+      for (let ii = 0; ii < data.length; ii++) {
+        downloadContent = downloadContent.concat(
+          `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\n`
+        );
+      }
+
+      const element = document.createElement("a");
+      const file = new Blob([downloadContent], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = outFilename + scan + ".txt";
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
+    } else {
+      setStatus(
+        "Empty data! Please check your data file and inputs, and try again!"
+      );
+      alert(
+        "Empty data! Please check your data file and inputs, and try again!"
       );
     }
-
-    const element = document.createElement("a");
-    const file = new Blob([downloadContent], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = "data.txt";
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
   };
 
   const HandleUpload = (e) => {
+    setFilename(e.target.files[0].name);
     const reader = new FileReader();
     reader.readAsText(e.target.files[0]);
     reader.onload = async (e) => {
@@ -172,6 +212,7 @@ function DataUploader() {
       const content = text.split("\n");
       setContent(content);
       setStatus("File uploaded");
+      setScan(-1);
     };
   };
 
@@ -253,12 +294,16 @@ function DataUploader() {
       </p>
 
       <h4>
-        <button className="dwbtn">
-          <CSVLink data={data}>Download CSV</CSVLink>
-        </button>
         <button className="dwbtn" onClick={DownloadPlaintext}>
           Download Plaintext
         </button>
+
+        <button className="dwbtn">
+          <CSVLink data={data} filename={outFilename + scan + ".csv"}>
+            Download CSV
+          </CSVLink>
+        </button>
+
       </h4>
       <p>
         <i>
