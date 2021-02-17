@@ -1,52 +1,33 @@
-import React from "react";
-import { CSVLink } from "react-csv";
+import React, { useState } from "react";
 
 function DataUploader() {
-  const [filename, setFilename] = React.useState("");
-  const [outFilename, SetOutFilename] = React.useState("");
-  const [scan, setScan] = React.useState(-1);
-  const [content, setContent] = React.useState([]);
-  const [data, setData] = React.useState([]);
-  const [status, setStatus] = React.useState("No data file uploaded");
-  const [colNames, setColNames] = React.useState([]);
-  const [xCol, setXCol] = React.useState(0);
-  const [ICol, setICol] = React.useState(1);
-  const [I0Col, setI0Col] = React.useState(-1);
+  const [filename, setFilename] = useState("");
+  const [outFilename, SetOutFilename] = useState("");
+  const [content, setContent] = useState([]);
+  const [data, setData] = useState([]);
+  const [status, setStatus] = useState("No data file uploaded yet.");
+  const [scan, setScan] = useState(-1);
+  const [colNames, setColNames] = useState([]);
+  const [xCol, setXCol] = useState(0);
+  const [ICol, setICol] = useState(1);
+  const [I0Col, setI0Col] = useState(-1);
 
   const ProcessData = () => {
     const t0 = performance.now();
 
     // check content exists
     if (content.length < 1) {
-      setStatus("Input file is empty!");
+      setStatus("Input file is empty.");
       setData([]);
       setColNames([]);
       return;
     }
 
-    // check validity of inputs
-    if (!scan && scan !== 0) {
-      setStatus("Please enter a valid X-col index!");
+    // check validity of scan number
+    if (!scan) {
+      setStatus("Please enter a valid scan number.");
       setData([]);
       setColNames([]);
-      return;
-    }
-
-    if ((!xCol && xCol !== 0) || xCol < 0) {
-      setStatus("Please enter a valid X-col index!");
-      setData([]);
-      return;
-    }
-
-    if ((!ICol && ICol !== 0) || ICol < 0) {
-      setStatus("Please enter a valid intensity-col index!");
-      setData([]);
-      return;
-    }
-
-    if ((!I0Col && I0Col !== 0) || I0Col < -1) {
-      setStatus("Please enter a valid I_0-col index!");
-      setData([]);
       return;
     }
 
@@ -117,19 +98,33 @@ function DataUploader() {
     }
 
     // check validity of column index
-    if (xCol > data[0].length - 1) {
+    if (!xCol && xCol !== 0) {
+      setStatus("Please enter a valid X-col index.");
+      setData([]);
+      return;
+    }
+
+    if (!ICol && ICol !== 0) {
+      setStatus("Please enter a valid intensity-col index.");
+      setData([]);
+      return;
+    }
+
+    if (!I0Col && I0Col !== 0) {
+      setStatus("Please enter a valid I_0-col index.");
+      setData([]);
+      return;
+    }
+
+    if (xCol > data[0].length - 1 || xCol < 0) {
       setStatus("X-column index is out of range.");
       setData([]);
       return;
-    } else if (ICol > data[0].length - 1) {
+    } else if (ICol > data[0].length - 1 || ICol < 0) {
       setStatus("Intensity-column index is out of range.");
       setData([]);
       return;
-    } else if (I0Col > data[0].length - 1) {
-      setStatus("I_0-column index is out of range.");
-      setData([]);
-      return;
-    } else if (I0Col < -1) {
+    } else if (I0Col > data[0].length - 1 || I0Col < -1) {
       setStatus("I_0-column index is out of range.");
       setData([]);
       return;
@@ -155,11 +150,15 @@ function DataUploader() {
 
     const t1 = performance.now();
     // console.log("The processing took " + (t1 - t0) + " milliseconds.");
-    if (data.length > 0) {
+    if (newData.length > 0) {
       setStatus(
-        `Success! Processed in < ${parseInt(
+        `Success! Processed in ~${parseInt(
           t1 - t0 + 1 + Math.random() * 10 // random number [0, 10] added
         )} millisecond.`
+      );
+    } else {
+      setStatus(
+        "Empty output! Please check your data file and inputs, and try again!"
       );
     }
 
@@ -195,10 +194,42 @@ function DataUploader() {
       element.click();
     } else {
       setStatus(
-        "Empty data! Please check your data file and inputs, and try again!"
+        "Empty output! Please check your data file and inputs, and try again!"
       );
       alert(
-        "Empty data! Please check your data file and inputs, and try again!"
+        "Empty output! Please check your data file and inputs, and try again!"
+      );
+    }
+  };
+
+  const DownloadCSV = () => {
+    if (data.length > 0) {
+      let downloadContent = "";
+
+      for (let ii = 0; ii < data.length - 1; ii++) {
+        downloadContent = downloadContent.concat(
+          `${data[ii][0]},${parseFloat(data[ii][1]).toExponential()}\r\n`
+        );
+      }
+
+      downloadContent = downloadContent.concat(
+        `${data[data.length - 1][0]},${parseFloat(
+          data[data.length - 1][1]
+        ).toExponential()}`
+      );
+
+      const element = document.createElement("a");
+      const file = new Blob([downloadContent], { type: "text/csv" });
+      element.href = URL.createObjectURL(file);
+      element.download = outFilename + scan + ".csv";
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
+    } else {
+      setStatus(
+        "Empty output! Please check your data file and inputs, and try again!"
+      );
+      alert(
+        "Empty output! Please check your data file and inputs, and try again!"
       );
     }
   };
@@ -221,7 +252,11 @@ function DataUploader() {
       <h3>Process SUV beamline data</h3>
       <form className="form">
         <p>Select data file:</p>
-        <input type="file" onChange={HandleUpload} />
+        <input
+          type="file"
+          onChange={HandleUpload}
+          style={{ width: "250px", fontSize: "0.9em" }}
+        />
         <br />
         <br />
         <p>
@@ -279,65 +314,77 @@ function DataUploader() {
         ></input>
       </form>
 
-      <p>
+      <div>
         <button onClick={ProcessData} className="btn">
           Process data
         </button>
-        ({status})
-      </p>
+        <button onClick={() => window.location.reload()} className="btn">
+          Clear All
+        </button>
+        <br />
+        <br />
+        <p>
+          <code>
+            <b>Status: </b>
+            {status}
+          </code>
+        </p>
+      </div>
       <p>
-        <i>
-          It will export X (say, energy or angle) and Intensity columns (or I/I
-          <sub>0</sub>, if you have set I<sub>0</sub> index) to <b>.csv</b> and{" "}
-          <b>.txt</b> plaintext formats.
-        </i>
-      </p>
-
-      <h4>
-        <button className="dwbtn" onClick={DownloadPlaintext}>
+        <button className="btn" onClick={DownloadCSV}>
+          Download CSV
+        </button>
+        <button className="btn" onClick={DownloadPlaintext}>
           Download Plaintext
         </button>
-
-        <button className="dwbtn">
-          <CSVLink data={data} filename={outFilename + scan + ".csv"}>
-            Download CSV
-          </CSVLink>
-        </button>
-
-      </h4>
-      <p>
-        <i>
-          Your data columns will be listed bellow once processed. You can
-          re-renter the columns above, and click <b>Process Data</b> button
-          again if you have chosen wrong columns, or change the scan number to
-          process multiple scans from the same input file. Note that column
-          headers might not correspond to actual data columns, please consult
-          with beamline personal about your data file format.
-        </i>
       </p>
       <p>
-        {colNames.map((x, index) => (
-          <li key={index}>
-            {index} : {x}
-          </li>
-        ))}
+        <code>
+          <b>Column names:</b>
+          <br />
+          {colNames.map((x, index) => (
+            <li style={{ listStyle: "none" }} key={index}>
+              {index} : {x}
+            </li>
+          ))}
+        </code>
       </p>
-
-      <button onClick={() => window.location.reload()} className="btn">
-        Clear All
-      </button>
       <br />
-      <br />
+      <p style={{ textAlign: "center" }}>* * *</p>
       <p>
-        A sample data file can be found{" "}
+        This program will export X (say, energy or angle) and Intensity columns
+        (or I/I<sub>0</sub>, if you have set I<sub>0</sub> index) to <b>.csv</b>{" "}
+        and <b>.txt</b> plaintext formats.
+        <br />
+        <br />
+        Your data columns will be listed above once processed. You can re-renter
+        the columns above, and click <b>Process Data</b> button again if you
+        have chosen wrong columns, or you can change the scan number to process
+        multiple scans from the same input file. Note that column headers might
+        not correspond to actual data columns, please consult with beamline
+        personal about your data file format.
+        <br />
+        <br />
+        You may not be able to enter <code>-1</code> in some fields by start
+        typing with <code>-</code> sign. Please type <code>1</code> first, and
+        then move the cursor to the beginning and enter <code>-</code> sign.
+        Alternatively, you may enter <code>0</code> and use the down arrow to
+        set <code>-1</code> if your browser supports.
+        <br />
+        <br />
+        If you upload a new data file with the same name as currently uploaded
+        file, the browser may not trigger the event this program relies on
+        updating the states. In such cases, please use the <b>Clear All</b>{" "}
+        button before uploading new file with the same name.
+        <br />
+        <br />A sample data file can be found{" "}
         <a href="./data.txt" target="_blank">
           here
         </a>
-        .
-      </p>
-      <p>
-        If you are interested in the Python app with more features, please visit{" "}
-        <a href="https://pranabdas.github.io/suvtools/">this page</a>.
+        . If you are interested in the Python app with more features, please
+        visit <a href="https://pranabdas.github.io/suvtools/">this page</a>. If
+        you find any bug or have some suggestions to improve this application,
+        please let me know. Thank you.
       </p>
     </div>
   );

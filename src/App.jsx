@@ -7,8 +7,6 @@ function App() {
     <>
       <DataUploader />
       {/* <PlotComponent /> */}
-      <br />
-      <br />
       <footer>
         © Copyright {new Date().getFullYear().toString()}{" "}
         <a href="https://pranabdas.github.io/">Pranab Das</a>. All rights
