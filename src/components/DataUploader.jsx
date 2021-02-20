@@ -7,6 +7,7 @@ function DataUploader() {
   const [data, setData] = useState([]);
   const [status, setStatus] = useState("No data file uploaded yet.");
   const [scan, setScan] = useState(-1);
+  const [isColNames, setIsColNames] = useState("");
   const [colNames, setColNames] = useState([]);
   const [xCol, setXCol] = useState(0);
   const [ICol, setICol] = useState(1);
@@ -68,19 +69,24 @@ function DataUploader() {
     }
 
     let data = [];
+    let colNames = [];
     for (let ii = 0; ii < lineEnd - lineStart; ii++) {
       if (content[ii + lineStart][0] !== "#" && content[ii + lineStart]) {
         data.push(content[ii + lineStart].split(" "));
-      } else if (
-        content[ii + lineStart][0] === "#" &&
-        content[ii + lineStart][1] === "L"
-      ) {
-        let colNames = content[ii + lineStart];
+      } else if (content[ii + lineStart].slice(0, 2) === "#L") {
+        colNames = content[ii + lineStart];
         colNames = colNames.split(" ");
         colNames = colNames.filter((x) => x);
         colNames.shift();
-        setColNames(colNames);
       }
+    }
+
+    if (colNames.length > 0) {
+      setColNames(colNames);
+      setIsColNames("Column names: ");
+    } else {
+      setColNames([]);
+      setIsColNames(["No column name header found."]);
     }
 
     // convert intensity values to number instead of str
@@ -340,7 +346,7 @@ function DataUploader() {
       </p>
       <p>
         <code>
-          <b>Column names:</b>
+          <b>{isColNames}</b>
           <br />
           {colNames.map((x, index) => (
             <li style={{ listStyle: "none" }} key={index}>
