@@ -1,5 +1,5 @@
 /*
-=============== 
+===============
 Variables
 ===============
 */
@@ -55,7 +55,7 @@ Variables
   --clr-orange-10: hsl(13, 73%, 16%);
 }
 /*
-=============== 
+===============
 Global Styles
 ===============
 */
@@ -161,7 +161,11 @@ p {
 
 .container {
   text-align: left;
-  margin-top: 1rem;
+  margin-top: 2rem;
+}
+hr {
+  border-top: 0.5px;
+  border-left: 0;
 }
 .btn {
   display: inline-block;
@@ -342,14 +346,6 @@ footer {
   color: #999;
   padding: 10px;
   text-align: center;
-}
-
-footer a {
-  color: #ccc;
-}
-
-footer a:hover {
-color: #999;
 }
 
 select {

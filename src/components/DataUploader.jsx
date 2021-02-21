@@ -16,19 +16,21 @@ function DataUploader() {
   const ProcessData = () => {
     const t0 = performance.now();
 
-    // check content exists
-    if (content.length < 1) {
+    // check if there is any content
+    if (!content.length) {
       setStatus("Input file is empty.");
       setData([]);
       setColNames([]);
+      setIsColNames("");
       return;
     }
 
-    // check validity of scan number
-    if (!scan) {
+    // check scan number field is not empty
+    if (!scan && scan !== 0) {
       setStatus("Please enter a valid scan number.");
       setData([]);
       setColNames([]);
+      setIsColNames("");
       return;
     }
 
@@ -52,10 +54,11 @@ function DataUploader() {
     }
 
     // check if the scan exists
-    if (content.length && id === -1) {
+    if (id === -1) {
       setStatus(`Scan number ${scan} not found.`);
       setData([]);
       setColNames([]);
+      setIsColNames("");
       return;
     }
 
@@ -81,7 +84,7 @@ function DataUploader() {
       }
     }
 
-    if (colNames.length > 0) {
+    if (colNames.length) {
       setColNames(colNames);
       setIsColNames("Column names: ");
     } else {
@@ -97,7 +100,7 @@ function DataUploader() {
     }
 
     // check if data found
-    if (data.length < 1) {
+    if (!data.length) {
       setStatus("Empty data! Please check data file and inputs.");
       setData([]);
       return;
@@ -156,7 +159,7 @@ function DataUploader() {
 
     const t1 = performance.now();
     // console.log("The processing took " + (t1 - t0) + " milliseconds.");
-    if (newData.length > 0) {
+    if (newData.length) {
       setStatus(
         `Success! Processed in ~${parseInt(
           t1 - t0 + 1 + Math.random() * 10 // random number [0, 10] added
@@ -169,12 +172,9 @@ function DataUploader() {
     }
 
     if (
-      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
-        ".txt" ||
-      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
-        ".csv" ||
-      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
-        ".dat"
+      [".csv", ".dat", ".txt"].includes(
+        filename.slice(filename.length - 4, filename.length).toLowerCase()
+      )
     ) {
       SetOutFilename(filename.slice(0, filename.length - 4) + "_scan_");
     } else {
@@ -183,12 +183,12 @@ function DataUploader() {
   };
 
   const DownloadPlaintext = () => {
-    if (data.length > 0) {
+    if (data.length) {
       let downloadContent = "";
 
       for (let ii = 0; ii < data.length; ii++) {
         downloadContent = downloadContent.concat(
-          `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\n`
+          `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\r\n`
         );
       }
 
@@ -209,7 +209,7 @@ function DataUploader() {
   };
 
   const DownloadCSV = () => {
-    if (data.length > 0) {
+    if (data.length) {
       let downloadContent = "";
 
       for (let ii = 0; ii < data.length - 1; ii++) {
@@ -255,7 +255,9 @@ function DataUploader() {
 
   return (
     <div className="container">
-      <h3>Process SUV beamline data</h3>
+      <h3>Convert SUV beamline data</h3>
+      <hr/>
+      <br/>
       <form className="form">
         <p>Select data file:</p>
         <input
@@ -307,7 +309,7 @@ function DataUploader() {
         <br />
         <p>
           Set I<sub>0</sub> column index below (leave <code>-1</code>, if you do
-          not want to divide by I<sub>0</sub>):
+          not need to divide by I<sub>0</sub>):
         </p>
         <input
           type="number"
@@ -355,20 +357,21 @@ function DataUploader() {
           ))}
         </code>
       </p>
+      <hr/>
       <br />
-      <p style={{ textAlign: "center" }}>* * *</p>
+
       <p>
         This program will export X (say, energy or angle) and Intensity columns
         (or I/I<sub>0</sub>, if you have set I<sub>0</sub> index) to <b>.csv</b>{" "}
         and <b>.txt</b> plaintext formats.
         <br />
         <br />
-        Your data columns will be listed above once processed. You can re-renter
-        the columns above, and click <b>Process Data</b> button again if you
-        have chosen wrong columns, or you can change the scan number to process
-        multiple scans from the same input file. Note that column headers might
-        not correspond to actual data columns, please consult with beamline
-        personal about your data file format.
+        Your data columns will be listed above once processed. You can re-enter
+        the column indices above, and click <b>Process Data</b> button again if
+        you have chosen wrong columns, or you can change the scan number to
+        process multiple scans from the same input file. Note that column
+        headers might not correspond to actual data columns, please consult with
+        beamline personal about your data file format.
         <br />
         <br />
         You may not be able to enter <code>-1</code> in some fields by start
@@ -383,7 +386,13 @@ function DataUploader() {
         updating the states. In such cases, please use the <b>Clear All</b>{" "}
         button before uploading new file with the same name.
         <br />
-        <br />A sample data file can be found{" "}
+        <br />
+        Want to improve this application, or interested in how it works? View
+        code at{" "}
+        <a href="https://github.com/pranabdas/suvapp/blob/master/src/components/DataUploader.jsx">
+          GitHub
+        </a>
+        . A sample data file can be found{" "}
         <a href="./data.txt" target="_blank">
           here
         </a>
