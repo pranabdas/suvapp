@@ -16,19 +16,21 @@ function DataUploader() {
   const ProcessData = () => {
     const t0 = performance.now();
 
-    // check content exists
-    if (content.length < 1) {
+    // check if there is any content 
+    if (!content.length) {
       setStatus("Input file is empty.");
       setData([]);
       setColNames([]);
+      setIsColNames("");
       return;
     }
 
-    // check validity of scan number
-    if (!scan) {
+    // check scan number field is not empty
+    if (!scan && scan !==0) {
       setStatus("Please enter a valid scan number.");
       setData([]);
       setColNames([]);
+      setIsColNames("");
       return;
     }
 
@@ -52,10 +54,11 @@ function DataUploader() {
     }
 
     // check if the scan exists
-    if (content.length && id === -1) {
+    if (id === -1) {
       setStatus(`Scan number ${scan} not found.`);
       setData([]);
       setColNames([]);
+      setIsColNames("");
       return;
     }
 
@@ -81,7 +84,7 @@ function DataUploader() {
       }
     }
 
-    if (colNames.length > 0) {
+    if (colNames.length) {
       setColNames(colNames);
       setIsColNames("Column names: ");
     } else {
@@ -97,7 +100,7 @@ function DataUploader() {
     }
 
     // check if data found
-    if (data.length < 1) {
+    if (!data.length) {
       setStatus("Empty data! Please check data file and inputs.");
       setData([]);
       return;
@@ -156,7 +159,7 @@ function DataUploader() {
 
     const t1 = performance.now();
     // console.log("The processing took " + (t1 - t0) + " milliseconds.");
-    if (newData.length > 0) {
+    if (newData.length) {
       setStatus(
         `Success! Processed in ~${parseInt(
           t1 - t0 + 1 + Math.random() * 10 // random number [0, 10] added
@@ -169,12 +172,9 @@ function DataUploader() {
     }
 
     if (
-      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
-        ".txt" ||
-      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
-        ".csv" ||
-      filename.slice(filename.length - 4, filename.length).toLowerCase() ===
-        ".dat"
+      [".csv", ".dat", ".txt"].includes(
+        filename.slice(filename.length - 4, filename.length).toLowerCase()
+      )
     ) {
       SetOutFilename(filename.slice(0, filename.length - 4) + "_scan_");
     } else {
@@ -183,12 +183,12 @@ function DataUploader() {
   };
 
   const DownloadPlaintext = () => {
-    if (data.length > 0) {
+    if (data.length) {
       let downloadContent = "";
 
       for (let ii = 0; ii < data.length; ii++) {
         downloadContent = downloadContent.concat(
-          `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\n`
+          `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\r\n`
         );
       }
 
@@ -209,7 +209,7 @@ function DataUploader() {
   };
 
   const DownloadCSV = () => {
-    if (data.length > 0) {
+    if (data.length) {
       let downloadContent = "";
 
       for (let ii = 0; ii < data.length - 1; ii++) {
@@ -307,7 +307,7 @@ function DataUploader() {
         <br />
         <p>
           Set I<sub>0</sub> column index below (leave <code>-1</code>, if you do
-          not want to divide by I<sub>0</sub>):
+          not need to divide by I<sub>0</sub>):
         </p>
         <input
           type="number"
