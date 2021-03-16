@@ -16,7 +16,7 @@ function DataUploader() {
   const ProcessData = () => {
     const t0 = performance.now();
 
-    // check if there is any content 
+    // check if there is any content
     if (!content.length) {
       setStatus("Input file is empty.");
       setData([]);
@@ -26,7 +26,7 @@ function DataUploader() {
     }
 
     // check scan number field is not empty
-    if (!scan && scan !==0) {
+    if (!scan && scan !== 0) {
       setStatus("Please enter a valid scan number.");
       setData([]);
       setColNames([]);
@@ -255,7 +255,7 @@ function DataUploader() {
 
   return (
     <div className="container">
-      <h3>Process SUV beamline data</h3>
+      <h3>Convert SUV beamline data</h3>
       <form className="form">
         <p>Select data file:</p>
         <input
@@ -383,7 +383,13 @@ function DataUploader() {
         updating the states. In such cases, please use the <b>Clear All</b>{" "}
         button before uploading new file with the same name.
         <br />
-        <br />A sample data file can be found{" "}
+        <br />
+        Want to improve this application, or interested in how it works? View
+        code at{" "}
+        <a href="https://github.com/pranabdas/suvapp/blob/master/src/components/DataUploader.jsx">
+          GitHub
+        </a>
+        . A sample data file can be found{" "}
         <a href="./data.txt" target="_blank">
           here
         </a>
