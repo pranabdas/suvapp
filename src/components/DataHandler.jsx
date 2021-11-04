@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
-function DataUploader() {
+function DataHandler() {
   const [filename, setFilename] = useState("");
   const [outFilename, SetOutFilename] = useState("");
   const [content, setContent] = useState([]);
   const [data, setData] = useState([]);
-  const [status, setStatus] = useState("No data file uploaded yet.");
+  const [status, setStatus] = useState("No data file selected yet.");
   const [scan, setScan] = useState(-1);
   const [isColNames, setIsColNames] = useState("");
   const [colNames, setColNames] = useState([]);
@@ -86,10 +86,10 @@ function DataUploader() {
 
     if (colNames.length) {
       setColNames(colNames);
-      setIsColNames("Column names: ");
+      setIsColNames("Column names:");
     } else {
       setColNames([]);
-      setIsColNames(["No column name header found."]);
+      setIsColNames(["No column name found in the header."]);
     }
 
     // convert intensity values to number instead of str
@@ -188,7 +188,7 @@ function DataUploader() {
 
       for (let ii = 0; ii < data.length; ii++) {
         downloadContent = downloadContent.concat(
-          `${data[ii][0]}  ${parseFloat(data[ii][1]).toExponential()}\r\n`
+          `${data[ii][0]}\t${parseFloat(data[ii][1]).toExponential()}\r\n`
         );
       }
 
@@ -240,6 +240,27 @@ function DataUploader() {
     }
   };
 
+  const CopyToClipboard = () => {
+    if (data.length) {
+      let dataContent = "";
+
+      for (let ii = 0; ii < data.length; ii++) {
+        dataContent = dataContent.concat(
+          `${data[ii][0]}\t${parseFloat(data[ii][1]).toExponential()}\r\n`
+        );
+      }
+      setStatus(
+        "Data copied to clipboard. Now you can directly paste into Origin/Igor/Excel tables."
+      );
+      navigator.clipboard.writeText(dataContent);
+    } else {
+      setStatus(
+        "Empty clipboard! Please check your data file and inputs, and try again!"
+      );
+      navigator.clipboard.writeText("");
+    }
+  };
+
   const HandleUpload = (e) => {
     setFilename(e.target.files[0].name);
     const reader = new FileReader();
@@ -248,23 +269,25 @@ function DataUploader() {
       const text = e.target.result;
       const content = text.split("\n");
       setContent(content);
-      setStatus("File uploaded");
+      setStatus("File selected");
       setScan(-1);
     };
   };
 
   return (
     <div className="container">
-      <h3>Convert SUV beamline data</h3>
-      <hr/>
-      <br/>
+      <h3 style={{ color: "#15847b" }}>Convert SUV beamline data</h3>
+      <hr />
+      <br />
       <form className="form">
         <p>Select data file:</p>
         <input
           type="file"
           onChange={HandleUpload}
-          style={{ width: "250px", fontSize: "0.9em" }}
+          style={{ width: "250px", fontSize: "0.9em", cursor: "pointer" }}
+          title="Select data file"
         />
+
         <br />
         <br />
         <p>
@@ -324,14 +347,14 @@ function DataUploader() {
 
       <div>
         <button onClick={ProcessData} className="btn">
-          Process data
+          Process Data
         </button>
         <button onClick={() => window.location.reload()} className="btn">
-          Clear All
+          Start Over
         </button>
         <br />
         <br />
-        <p>
+        <p className="status">
           <code>
             <b>Status: </b>
             {status}
@@ -340,69 +363,40 @@ function DataUploader() {
       </div>
       <p>
         <button className="btn" onClick={DownloadCSV}>
-          Download CSV
+          Save as CSV
         </button>
         <button className="btn" onClick={DownloadPlaintext}>
-          Download Plaintext
+          Save as TXT
+        </button>
+        <button className="btn" onClick={CopyToClipboard}>
+          Copy to Clipboard
         </button>
       </p>
-      <p>
+      <p style={{ marginLeft: "1em" }}>
+        <br />
+        <b>{isColNames}</b>
         <code>
-          <b>{isColNames}</b>
           <br />
-          {colNames.map((x, index) => (
-            <li style={{ listStyle: "none" }} key={index}>
-              {index} : {x}
-            </li>
-          ))}
+          {colNames.map((x, index) => {
+            if (index < 10) {
+              return (
+                <li style={{ listStyle: "none" }} key={index}>
+                  &nbsp;{index} &raquo; {x}
+                </li>
+              );
+            } else {
+              return (
+                <li style={{ listStyle: "none" }} key={index}>
+                  {index} &raquo; {x}
+                </li>
+              );
+            }
+          })}
         </code>
-      </p>
-      <hr/>
-      <br />
-
-      <p>
-        This program will export X (say, energy or angle) and Intensity columns
-        (or I/I<sub>0</sub>, if you have set I<sub>0</sub> index) to <b>.csv</b>{" "}
-        and <b>.txt</b> plaintext formats.
         <br />
-        <br />
-        Your data columns will be listed above once processed. You can re-enter
-        the column indices above, and click <b>Process Data</b> button again if
-        you have chosen wrong columns, or you can change the scan number to
-        process multiple scans from the same input file. Note that column
-        headers might not correspond to actual data columns, please consult with
-        beamline personal about your data file format.
-        <br />
-        <br />
-        You may not be able to enter <code>-1</code> in some fields by start
-        typing with <code>-</code> sign. Please type <code>1</code> first, and
-        then move the cursor to the beginning and enter <code>-</code> sign.
-        Alternatively, you may enter <code>0</code> and use the down arrow to
-        set <code>-1</code> if your browser supports.
-        <br />
-        <br />
-        If you upload a new data file with the same name as currently uploaded
-        file, the browser may not trigger the event this program relies on
-        updating the states. In such cases, please use the <b>Clear All</b>{" "}
-        button before uploading new file with the same name.
-        <br />
-        <br />
-        Want to improve this application, or interested in how it works? View
-        code at{" "}
-        <a href="https://github.com/pranabdas/suvapp/blob/master/src/components/DataUploader.jsx">
-          GitHub
-        </a>
-        . A sample data file can be found{" "}
-        <a href="./data.txt" target="_blank">
-          here
-        </a>
-        . If you are interested in the Python app with more features, please
-        visit <a href="https://pranabdas.github.io/suvtools/">this page</a>. If
-        you find any bug or have some suggestions to improve this application,
-        please let me know. Thank you.
       </p>
     </div>
   );
 }
 
-export default DataUploader;
+export default DataHandler;

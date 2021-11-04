@@ -1,3 +1,3 @@
 # SUV App
 
-Visit the app page [here](https://suv.netlify.app).
+Visit the app here: <https://suv.netlify.app>
