@@ -1,4 +1,6 @@
 import { useState } from "react";
+import PlotComponent from "./PlotComponent";
+import RenderTable from "./RenderTable";
 
 function App() {
   const [filename, setFilename] = useState(null);
@@ -14,6 +16,7 @@ function App() {
   });
   const [data, setData] = useState([]);
   const [IbyI0, setIbyI0] = useState(true);
+  const [showPlot, setShowPlot] = useState(false);
 
   const HandleUpload = (e) => {
     const fname = e.target.files[0].name;
@@ -68,6 +71,7 @@ function App() {
 
     setColNames(tmpColNames);
     setSelectedScan(selectedScan);
+    setShowPlot(false);
     setData([]);
   };
 
@@ -78,6 +82,7 @@ function App() {
 
     setSelectedCol({ ...selectedCol, [name]: value });
     setData([]);
+    setShowPlot(false);
   };
 
   const ProcessData = () => {
@@ -133,156 +138,235 @@ function App() {
       }
     }
     setData(tmpData);
+    setShowPlot(false);
   };
 
   const HandleCheckbox = (e) => {
     setData([]);
+    setShowPlot(false);
     setIbyI0(e.target.checked);
+  };
+
+  const SetShowPlot = () => {
+    setShowPlot(!showPlot);
+  };
+
+  const SaveData = () => {
+    let outFilename;
+    const dim = data[0].length;
+
+    if (
+      [".csv", ".dat", ".txt"].includes(
+        filename.slice(filename.length - 4, filename.length).toLowerCase()
+      )
+    ) {
+      outFilename = filename.slice(0, filename.length - 4) + "_scan_";
+    } else {
+      outFilename = filename + "_scan_";
+    }
+
+    let downloadContent = "";
+
+    for (let ii = 0; ii < data.length; ii++) {
+      if (dim === 2) {
+        downloadContent = downloadContent.concat(
+          `${data[ii][0]}\t${data[ii][1]}\r\n`
+        );
+      } else if (dim === 3) {
+        downloadContent = downloadContent.concat(
+          `${data[ii][0]}\t${data[ii][1]}\t${data[ii][2]}\r\n`
+        );
+      }
+    }
+
+    const element = document.createElement("a");
+    const file = new Blob([downloadContent], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = outFilename + selectedScan + ".txt";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+  };
+
+  const CopyData = () => {
+    const dim = data[0].length;
+    if (data.length) {
+      let dataContent = "";
+
+      for (let ii = 0; ii < data.length; ii++) {
+        if (dim === 2) {
+          dataContent = dataContent.concat(
+            `${data[ii][0]}\t${data[ii][1]}\r\n`
+          );
+        } else if (dim === 3) {
+          dataContent = dataContent.concat(
+            `${data[ii][0]}\t${data[ii][1]}\t${data[ii][2]}\r\n`
+          );
+        }
+      }
+      navigator.clipboard.writeText(dataContent);
+    } else {
+      navigator.clipboard.writeText("");
+    }
   };
 
   return (
     <div className="container">
-      <h3>SUV App</h3>
-      <form className="form">
-        <p>
-          Select data file:&emsp;
-          <input
-            type="file"
-            onChange={HandleUpload}
-            style={{ width: "300px", cursor: "pointer" }}
-            title="Select file"
-          />
-        </p>
-      </form>
-
-      {filename ? (
-        scan.length ? (
-          <p>{scan.length} scan(s) found.</p>
-        ) : (
-          <p>No scans found.</p>
-        )
-      ) : null}
-
-      {scan.length ? (
-        <form className="form" onChange={handleSelect}>
-          <label htmlFor="scan">Choose scan: &nbsp;</label>
-          <select id="scan" name="scan">
-            <option value="None selected">None Selected</option>
-            {scan.map((item, key) => (
-              <option value={item} key={key}>
-                {item}
-              </option>
-            ))}
-          </select>
+      <div className="wrapper">
+        <h3>SUV App</h3>
+        <form className="form">
+          <p>
+            Select data file:&emsp;
+            <input
+              type="file"
+              onChange={HandleUpload}
+              style={{ width: "300px", cursor: "pointer" }}
+              title="Select file"
+            />
+          </p>
         </form>
-      ) : null}
 
-      {selectedScan ? (
-        colNames.length ? (
-          <form className="form" onChange={handleSelectCol}>
-            <label htmlFor="xCol">Choose xCol: &nbsp;</label>
-            <select id="xCol" name="xCol">
+        {filename ? (
+          scan.length ? (
+            <p>{scan.length} scan(s) found.</p>
+          ) : (
+            <p>No scans found.</p>
+          )
+        ) : null}
+
+        {scan.length ? (
+          <form className="form" onChange={handleSelect}>
+            <label htmlFor="scan">Choose scan: &nbsp;</label>
+            <select id="scan" name="scan">
               <option value="None selected">None Selected</option>
-              {colNames.map((item, key) => (
-                <option value={item} key={key}>
-                  {item}
-                </option>
-              ))}
-            </select>
-            <br />
-            <label htmlFor="ICol">Choose ICol: &nbsp;</label>
-            <select id="ICol" name="ICol">
-              <option value="None selected">None Selected</option>
-              {colNames.map((item, key) => (
-                <option value={item} key={key}>
-                  {item}
-                </option>
-              ))}
-            </select>
-            <br />
-            <label htmlFor="I0Col">Choose I0Col: &nbsp;</label>
-            <select id="I0Col" name="I0Col">
-              <option value="None selected">None Selected</option>
-              {colNames.map((item, key) => (
+              {scan.map((item, key) => (
                 <option value={item} key={key}>
                   {item}
                 </option>
               ))}
             </select>
           </form>
-        ) : (
-          <p>Column name header not found</p>
-        )
-      ) : null}
+        ) : null}
 
-      {selectedCol.ICol && selectedCol.I0Col ? (
-        <p>
-          <input
-            type="checkbox"
-            style={{ width: "25px" }}
-            id="IbyI0"
-            name="IbyI0"
-            checked={IbyI0}
-            onChange={HandleCheckbox}
-          />
-          I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
-          columns separately.
-        </p>
-      ) : null}
+        {selectedScan ? (
+          colNames.length ? (
+            <form className="form" onChange={handleSelectCol}>
+              <label htmlFor="xCol">Choose xCol: &nbsp;</label>
+              <select id="xCol" name="xCol">
+                <option value="None selected">None Selected</option>
+                {colNames.map((item, key) => (
+                  <option value={item} key={key}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+              <br />
+              <label htmlFor="ICol">Choose ICol: &nbsp;</label>
+              <select id="ICol" name="ICol">
+                <option value="None selected">None Selected</option>
+                {colNames.map((item, key) => (
+                  <option value={item} key={key}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+              <br />
+              <label htmlFor="I0Col">Choose I0Col: &nbsp;</label>
+              <select id="I0Col" name="I0Col">
+                <option value="None selected">None Selected</option>
+                {colNames.map((item, key) => (
+                  <option value={item} key={key}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </form>
+          ) : (
+            <p>Column name header not found</p>
+          )
+        ) : null}
 
-      {selectedCol.xCol && selectedCol.ICol ? (
-        <button onClick={ProcessData} className="btn">
-          Process Data
-        </button>
-      ) : null}
+        {selectedCol.ICol && selectedCol.I0Col !== "None selected" ? (
+          <p>
+            <input
+              type="checkbox"
+              style={{ width: "25px" }}
+              id="IbyI0"
+              name="IbyI0"
+              checked={IbyI0}
+              onChange={HandleCheckbox}
+            />
+            I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
+            columns separately.
+          </p>
+        ) : null}
 
-      {data.length && IbyI0 ? (
-        <table>
-          <tbody>
-            <tr>
-              <th>X-Col</th>
-              <th>I-Col</th>
-            </tr>
-            {data.map((value, key) => (
-              <tr key={key}>
-                <td>
-                  <code>{parseFloat(value[0])}</code>
-                </td>
-                <td>
-                  <code>{parseFloat(value[1]).toExponential()}</code>
-                </td>
+        {selectedCol.xCol && selectedCol.ICol ? (
+          <>
+            <button onClick={ProcessData} className="btn">
+              Process Data
+            </button>
+
+            {showPlot && data.length ? (
+              <button onClick={SetShowPlot} className="btn">
+                Hide Plot
+              </button>
+            ) : null}
+
+            {!showPlot && data.length ? (
+              <button onClick={SetShowPlot} className="btn">
+                Show Plot
+              </button>
+            ) : null}
+          </>
+        ) : null}
+
+        {data.length ? (
+          <>
+            <button onClick={SaveData} className="btn">
+              Save
+            </button>
+            <button onClick={CopyData} className="btn">
+              Copy
+            </button>
+          </>
+        ) : null}
+
+        {showPlot ? <PlotComponent data={data} /> : null}
+
+        <br />
+        <br />
+        {data.length && IbyI0 ? (
+          <table>
+            <tbody>
+              <tr>
+                <th>X-Col</th>
+                <th>I-Col</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
+              <RenderTable data={data} />
+            </tbody>
+          </table>
+        ) : null}
 
-      {data.length && !IbyI0 ? (
-        <table>
-          <tbody>
-            <tr>
-              <th>X-Col</th>
-              <th>I-Col</th>
-              <th>
-                I<sub>0</sub>-Col
-              </th>
-            </tr>
-            {data.map((value, key) => (
-              <tr key={key}>
-                <td>
-                  <code>{parseFloat(value[0])}</code>
-                </td>
-                <td>
-                  <code>{parseFloat(value[1]).toExponential()}</code>
-                </td>
-                <td>
-                  <code>{parseFloat(value[2]).toExponential()}</code>
-                </td>
+        {data.length && !IbyI0 ? (
+          <table>
+            <tbody>
+              <tr>
+                <th>X-Col</th>
+                <th>I-Col</th>
+                <th>
+                  I<sub>0</sub>-Col
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
+              <RenderTable data={data} />
+            </tbody>
+          </table>
+        ) : null}
+      </div>
+      <footer>
+        The previous version of the app is available <a href="./v1/">here</a>.
+        Built and maintained by{" "}
+        <a href="https://github.com/pranabdas/xps">Pranab Das</a>.
+      </footer>
     </div>
   );
 }
