@@ -10,51 +10,9 @@
   --clr-black: #222;
   --clr-background: hsl(210, 36%, 96%);
   --clr-border: hsl(210, 31%, 80%);
-  --transition: all 0.1s linear;
   --max-width: 650px;
   --spacing: 0.1rem;
   --radius: 0.25rem;
-
-  /* --clr-primary-1: hsl(205, 86%, 17%);
-  --clr-primary-2: hsl(205, 77%, 27%);
-  --clr-primary-3: hsl(205, 72%, 37%);
-  --clr-primary-4: hsl(205, 63%, 48%);
-  --clr-primary-5: hsl(205, 78%, 60%);
-  --clr-primary-6: hsl(205, 89%, 70%);
-  --clr-primary-7: hsl(205, 90%, 76%);
-  --clr-primary-8: hsl(205, 86%, 81%);
-  --clr-primary-9: hsl(205, 90%, 88%);
-  --clr-primary-10: hsl(205, 100%, 96%);
-
-  --clr-grey-1: hsl(209, 61%, 16%);
-  --clr-grey-2: hsl(211, 39%, 23%);
-  --clr-grey-3: hsl(209, 34%, 30%);
-  --clr-grey-4: hsl(209, 28%, 39%);
-  --clr-grey-5: hsl(210, 22%, 49%);
-  --clr-grey-6: hsl(209, 23%, 60%);
-  --clr-grey-7: hsl(211, 27%, 70%);
-  --clr-grey-8: hsl(210, 31%, 80%);
-  --clr-grey-9: hsl(212, 33%, 89%);
-  --clr-grey-10: hsl(210, 36%, 96%);
-
-  --clr-red-dark: hsl(360, 67%, 44%);
-  --clr-red-light: hsl(360, 71%, 66%);
-  --clr-green-dark: hsl(125, 67%, 44%);
-  --clr-green-light: hsl(125, 71%, 66%);
-  --light-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  --dark-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-
-  --fixed-width: 450px;
-  --clr-orange-1: hsl(12, 83%, 98%);
-  --clr-orange-2: hsl(14, 91%, 95%);
-  --clr-orange-3: hsl(12, 89%, 89%);
-  --clr-orange-4: hsl(13, 87%, 82%);
-  --clr-orange-5: hsl(13, 88%, 68%);
-  --clr-orange-6: hsl(13, 88%, 55%);
-  --clr-orange-7: hsl(13, 74%, 49%);
-  --clr-orange-8: hsl(13, 74%, 33%);
-  --clr-orange-9: hsl(13, 73%, 25%);
-  --clr-orange-10: hsl(13, 73%, 16%); */
 }
 
 *,
@@ -74,8 +32,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Roboto Mono", "Courier New", monospace;
 }
 
 ul {
@@ -180,7 +137,6 @@ hr {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
   cursor: pointer;
-  transition: var(--transition);
 }
 .btn:hover {
   background: var(--clr-secondary-dark);
@@ -230,7 +186,7 @@ hr {
 footer {
   font-size: 0.75em;
   color: rgba(0, 27, 61, 0.6);
-  padding: 10px;
+  padding: 5px 2px 5px 2px;
   text-align: center;
   margin-bottom: 5px;
 }
@@ -271,4 +227,21 @@ select {
   border-radius: 5px;
   padding: 10px;
   border-color: var(--clr-secondary-light);
+}
+
+td {
+  padding: 0.25em 0.5em 0.25em 0.5em;
+}
+
+th {
+  padding: 0.5em;
+}
+
+table, th, td {
+  border: 0.5px solid lightgrey;
+  border-collapse: collapse;
+}
+
+.wrapper {
+  min-height: calc( 100vh - 60px );
 }
