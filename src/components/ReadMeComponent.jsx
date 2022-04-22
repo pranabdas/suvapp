@@ -37,7 +37,7 @@ function ReadMe() {
           relies on updating the states. In such cases, please use the{" "}
           <b>Start&nbsp;Over</b> button before uploading new file with the same
           name. A sample data file can be found{" "}
-          <a href="./data.txt" target="_blank">
+          <a href="https://suv.netlify.app/data.txt" target="_blank">
             here
           </a>
           .
