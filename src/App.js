@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import PlotComponent from "./PlotComponent";
 import RenderTable from "./RenderTable";
+import * as React from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import Checkbox from "@mui/material/Checkbox";
 
 function App() {
   const [filename, setFilename] = useState(null);
@@ -12,11 +20,14 @@ function App() {
   const [selectedCol, setSelectedCol] = useState({
     xCol: "",
     ICol: "",
-    I0Col: "None selected",
+    I0Col: "",
   });
   const [data, setData] = useState([]);
   const [IbyI0, setIbyI0] = useState(true);
   const [showPlot, setShowPlot] = useState(false);
+  const [showData, setShowData] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
+  const ploRef = useRef();
 
   const HandleUpload = (e) => {
     const fname = e.target.files[0].name;
@@ -42,6 +53,17 @@ function App() {
       setScanLine(scanLine);
     };
     setData([]);
+    setScan([]);
+    setSelectedScan(null);
+    setColNames([]);
+    setSelectedCol({
+      xCol: "",
+      ICol: "",
+      I0Col: "",
+    });
+    setIbyI0(true);
+    setShowPlot(false);
+    setShowData(false);
   };
 
   const handleSelect = (e) => {
@@ -72,6 +94,8 @@ function App() {
     setColNames(tmpColNames);
     setSelectedScan(selectedScan);
     setShowPlot(false);
+    setShowData(false);
+    setIbyI0(true);
     setData([]);
   };
 
@@ -83,6 +107,8 @@ function App() {
     setSelectedCol({ ...selectedCol, [name]: value });
     setData([]);
     setShowPlot(false);
+    setShowData(false);
+    setIbyI0(true);
   };
 
   const ProcessData = () => {
@@ -111,7 +137,7 @@ function App() {
     const xColIndex = colNames.indexOf(selectedCol.xCol);
     const IColIndex = colNames.indexOf(selectedCol.ICol);
 
-    if (selectedCol.I0Col === "None selected") {
+    if (!selectedCol.I0Col) {
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
@@ -127,7 +153,7 @@ function App() {
             parseFloat(fullData[ii][I0ColIndex]),
         ]);
       }
-    } else if (!IbyI0 && selectedCol.I0Col !== "None Selected") {
+    } else if (!IbyI0 && selectedCol.I0Col) {
       const I0ColIndex = colNames.indexOf(selectedCol.I0Col);
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
@@ -139,6 +165,7 @@ function App() {
     }
     setData(tmpData);
     setShowPlot(false);
+    setShowData(true);
   };
 
   const HandleCheckbox = (e) => {
@@ -149,6 +176,13 @@ function App() {
 
   const SetShowPlot = () => {
     setShowPlot(!showPlot);
+    setShowData(false);
+    ploRef.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const SetShowData = () => {
+    setShowData(!showData);
+    setShowPlot(false);
   };
 
   const SaveData = () => {
@@ -188,6 +222,10 @@ function App() {
   };
 
   const CopyData = () => {
+    setTimeout(() => {
+      setShowCopied(false);
+    }, 1500);
+
     const dim = data[0].length;
     if (data.length) {
       let dataContent = "";
@@ -204,6 +242,7 @@ function App() {
         }
       }
       navigator.clipboard.writeText(dataContent);
+      setShowCopied(true);
     } else {
       navigator.clipboard.writeText("");
     }
@@ -212,7 +251,9 @@ function App() {
   return (
     <div className="container">
       <div className="wrapper">
-        <h3>SUV App</h3>
+        <h3 style={{ color: "#15847b" }}>Convert SUV beamline data</h3>
+        <hr />
+        <br />
         <form className="form">
           <p>
             Select data file:&emsp;
@@ -227,145 +268,227 @@ function App() {
 
         {filename ? (
           scan.length ? (
-            <p>{scan.length} scan(s) found.</p>
+            <Alert severity="success">
+              {scan.length} scan(s) found in the file <b>{filename}</b>.
+            </Alert>
           ) : (
-            <p>No scans found.</p>
+            <Alert severity="error">
+              No scans found in the file <b>{filename}</b>. Please check the
+              data file format.
+            </Alert>
           )
         ) : null}
 
         {scan.length ? (
-          <form className="form" onChange={handleSelect}>
-            <label htmlFor="scan">Choose scan: &nbsp;</label>
-            <select id="scan" name="scan">
-              <option value="None selected">None Selected</option>
-              {scan.map((item, key) => (
-                <option value={item} key={key}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </form>
+          <>
+            <br />
+            <p>Select scan :</p>
+            <Box sx={{ m: 1, minWidth: 120 }}>
+              <FormControl fullWidth>
+                <InputLabel id="scan">Scan</InputLabel>
+                <Select
+                  labelId="scan"
+                  id="scan"
+                  value={selectedScan || ""}
+                  label="Scan"
+                  onChange={handleSelect}
+                >
+                  {scan.map((item, key) => (
+                    <MenuItem value={item} key={key}>
+                      {item}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </>
         ) : null}
+
+        <br />
 
         {selectedScan ? (
           colNames.length ? (
-            <form className="form" onChange={handleSelectCol}>
-              <label htmlFor="xCol">Choose xCol: &nbsp;</label>
-              <select id="xCol" name="xCol">
-                <option value="None selected">None Selected</option>
-                {colNames.map((item, key) => (
-                  <option value={item} key={key}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-              <br />
-              <label htmlFor="ICol">Choose ICol: &nbsp;</label>
-              <select id="ICol" name="ICol">
-                <option value="None selected">None Selected</option>
-                {colNames.map((item, key) => (
-                  <option value={item} key={key}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-              <br />
-              <label htmlFor="I0Col">Choose I0Col: &nbsp;</label>
-              <select id="I0Col" name="I0Col">
-                <option value="None selected">None Selected</option>
-                {colNames.map((item, key) => (
-                  <option value={item} key={key}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </form>
+            <>
+              <p>
+                Select data columns (first and second columns are required, last
+                column is optional):
+              </p>
+              <FormControl required sx={{ m: 1, minWidth: 120 }} size="small">
+                <InputLabel id="xCol">X-col</InputLabel>
+                <Select
+                  name="xCol"
+                  id="xCol"
+                  value={selectedCol.xCol || ""}
+                  label="X-Col"
+                  onChange={handleSelectCol}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {colNames.map((item, key) => (
+                    <MenuItem value={item} key={key}>
+                      {item}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl required sx={{ m: 1, minWidth: 120 }} size="small">
+                <InputLabel id="ICol">I-col</InputLabel>
+                <Select
+                  name="ICol"
+                  id="ICol"
+                  value={selectedCol.ICol || ""}
+                  label="I-Col"
+                  onChange={handleSelectCol}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {colNames.map((item, key) => (
+                    <MenuItem value={item} key={key}>
+                      {item}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                <InputLabel id="I0Col">
+                  I<sub>0</sub>-col
+                </InputLabel>
+                <Select
+                  name="I0Col"
+                  id="I0Col"
+                  value={selectedCol.I0Col || ""}
+                  label="I0-Col"
+                  onChange={handleSelectCol}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {colNames.map((item, key) => (
+                    <MenuItem value={item} key={key}>
+                      {item}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
           ) : (
-            <p>Column name header not found</p>
+            <Alert severity="error">Oops column header missing!</Alert>
           )
         ) : null}
 
-        {selectedCol.ICol && selectedCol.I0Col !== "None selected" ? (
-          <p>
-            <input
-              type="checkbox"
-              style={{ width: "25px" }}
-              id="IbyI0"
-              name="IbyI0"
-              checked={IbyI0}
-              onChange={HandleCheckbox}
-            />
-            I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
-            columns separately.
-          </p>
+        <br />
+
+        {selectedCol.ICol && selectedCol.I0Col ? (
+          <>
+            <p>
+              <Checkbox
+                checked={IbyI0}
+                onChange={HandleCheckbox}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+              I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
+              columns separately.
+            </p>
+          </>
         ) : null}
 
         {selectedCol.xCol && selectedCol.ICol ? (
-          <>
-            <button onClick={ProcessData} className="btn">
-              Process Data
-            </button>
-
-            {showPlot && data.length ? (
-              <button onClick={SetShowPlot} className="btn">
-                Hide Plot
-              </button>
-            ) : null}
-
-            {!showPlot && data.length ? (
-              <button onClick={SetShowPlot} className="btn">
-                Show Plot
-              </button>
-            ) : null}
-          </>
+          <button onClick={ProcessData} className="btn">
+            Process Data
+          </button>
         ) : null}
 
+        <br />
+        <br />
         {data.length ? (
           <>
             <button onClick={SaveData} className="btn">
-              Save
+              Save data
             </button>
             <button onClick={CopyData} className="btn">
-              Copy
+              {showCopied ? "Data copied" : "Copy data"}
             </button>
           </>
         ) : null}
 
-        {showPlot ? <PlotComponent data={data} /> : null}
+        <div ref={ploRef}>
+          <br />
+          {showData && data.length ? (
+            <button onClick={SetShowData} className="btn">
+              Hide Data
+            </button>
+          ) : null}
 
-        <br />
-        <br />
-        {data.length && IbyI0 ? (
-          <table>
-            <tbody>
-              <tr>
-                <th>X-Col</th>
-                <th>I-Col</th>
-              </tr>
-              <RenderTable data={data} />
-            </tbody>
-          </table>
+          {!showData && data.length ? (
+            <button onClick={SetShowData} className="btn">
+              Show Data
+            </button>
+          ) : null}
+
+          {showPlot && data.length ? (
+            <button onClick={SetShowPlot} className="btn">
+              Hide Plot
+            </button>
+          ) : null}
+
+          {!showPlot && data.length ? (
+            <button onClick={SetShowPlot} className="btn">
+              Show Plot
+            </button>
+          ) : null}
+        </div>
+
+        {showPlot ? (
+          <PlotComponent data={data} selectedCol={selectedCol} IbyI0={IbyI0} />
         ) : null}
 
-        {data.length && !IbyI0 ? (
-          <table>
-            <tbody>
-              <tr>
-                <th>X-Col</th>
-                <th>I-Col</th>
-                <th>
-                  I<sub>0</sub>-Col
-                </th>
-              </tr>
-              <RenderTable data={data} />
-            </tbody>
-          </table>
+        <br />
+        <br />
+
+        {showData ? (
+          <div>
+            {data.length && IbyI0 ? (
+              <table>
+                <tbody>
+                  <tr>
+                    <th>{selectedCol.xCol || "X-col"}</th>
+                    {selectedCol.I0Col ? (
+                      <th>
+                        {selectedCol.ICol + " / " + selectedCol.I0Col ||
+                          "I-col / I0-col"}
+                      </th>
+                    ) : (
+                      <th>{selectedCol.ICol || "I-col"}</th>
+                    )}
+                  </tr>
+                  <RenderTable data={data} />
+                </tbody>
+              </table>
+            ) : null}
+
+            {data.length && !IbyI0 ? (
+              <table>
+                <tbody>
+                  <tr>
+                    <th>{selectedCol.xCol || "X-col"}</th>
+                    <th>{selectedCol.ICol || "X-col"}</th>
+                    <th>{selectedCol.I0Col || "I0-Col"}</th>
+                  </tr>
+                  <RenderTable data={data} />
+                </tbody>
+              </table>
+            ) : null}
+          </div>
         ) : null}
       </div>
       <footer>
-        The previous version of the app is available <a href="./v1/">here</a>.
+        {/* The previous version of the app is available <a href="./v1/">here</a>. */}
         Built and maintained by{" "}
-        <a href="https://github.com/pranabdas/xps">Pranab Das</a>.
+        <a href="https://github.com/pranabdas/suvapp">Pranab Das</a>.
       </footer>
     </div>
   );
