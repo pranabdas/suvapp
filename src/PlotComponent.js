@@ -1,11 +1,11 @@
 import Plotly from "plotly.js-basic-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 
-const Plot = createPlotlyComponent(Plotly);
-
-function PlotComponent({ data, selectedCol, IbyI0 }) {
+function PlotComponent({ data, selectedCol, IbyI0, isYscaleLog }) {
+  const Plot = createPlotlyComponent(Plotly);
   let xdata = [],
     ydata = [];
+
   for (let ii = 0; ii < data.length; ii++) {
     xdata.push(data[ii][0]);
     ydata.push(data[ii][1]);
@@ -34,12 +34,26 @@ function PlotComponent({ data, selectedCol, IbyI0 }) {
     },
   ];
 
-  const layout = {
+  let layout = {
     xaxis: { title: { text: xlabel } },
     yaxis: { title: { text: ylabel } },
+    font: { size: 14 },
   };
 
-  return <Plot data={trace} config={{ responsive: true }} layout={layout} />;
+  if (isYscaleLog) {
+    layout = {
+      ...layout,
+      yaxis: { title: { text: ylabel }, type: "log" },
+    };
+  }
+
+  return (
+    <Plot
+      data={trace}
+      config={{ responsive: true, displayModeBar: true }}
+      layout={layout}
+    />
+  );
 }
 
 export default PlotComponent;

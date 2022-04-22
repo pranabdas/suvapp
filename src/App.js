@@ -1,7 +1,5 @@
-import { useState, useRef } from "react";
-import PlotComponent from "./PlotComponent";
-import RenderTable from "./RenderTable";
 import * as React from "react";
+import { useState, useRef } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
@@ -9,6 +7,8 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
+import PlotComponent from "./PlotComponent";
+import RenderTable from "./RenderTable";
 
 function App() {
   const [filename, setFilename] = useState(null);
@@ -27,7 +27,8 @@ function App() {
   const [showPlot, setShowPlot] = useState(false);
   const [showData, setShowData] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
-  const ploRef = useRef();
+  const [isYscaleLog, setIsYscaleLog] = useState(false);
+  const plotRef = useRef();
 
   const HandleUpload = (e) => {
     const fname = e.target.files[0].name;
@@ -171,13 +172,33 @@ function App() {
   const HandleCheckbox = (e) => {
     setData([]);
     setShowPlot(false);
+    setShowData(false);
     setIbyI0(e.target.checked);
+  };
+
+  const HandleIsYscaleLog = (e) => {
+    setIsYscaleLog(e.target.checked);
+
+    // setting showPlot to false and then immediately to true in order to force
+    // render the PlotComponent, otherwise sometimes the footer is hidden behind
+    // the plot.
+    setShowPlot(false);
+    setTimeout(() => {
+      setShowPlot(true);
+    }, 10);
+
+    // without setTimeout scrollIntoView seems not working
+    setTimeout(() => {
+      plotRef.current.scrollIntoView({ behavior: "smooth" });
+    }, 200);
   };
 
   const SetShowPlot = () => {
     setShowPlot(!showPlot);
     setShowData(false);
-    ploRef.current.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      plotRef.current.scrollIntoView({ behavior: "smooth" });
+    }, 10);
   };
 
   const SetShowData = () => {
@@ -269,12 +290,13 @@ function App() {
         {filename ? (
           scan.length ? (
             <Alert severity="success">
-              {scan.length} scan(s) found in the file <b>{filename}</b>.
+              <b>{scan.length}</b> {scan.length > 1 ? "scans" : "scan"} found in
+              the file <b>{filename}</b>.
             </Alert>
           ) : (
             <Alert severity="error">
-              No scans found in the file <b>{filename}</b>. Please check the
-              data file format.
+              <b>No</b> scans found in the file <b>{filename}</b>. Please ensure
+              SPEC/FOURC data format. A sample data file can be found <a href="https://suv.netlify.app/data.txt">here</a>.
             </Alert>
           )
         ) : null}
@@ -415,7 +437,7 @@ function App() {
           </>
         ) : null}
 
-        <div ref={ploRef}>
+        <>
           <br />
           {showData && data.length ? (
             <button onClick={SetShowData} className="btn">
@@ -440,49 +462,72 @@ function App() {
               Show Plot
             </button>
           ) : null}
-        </div>
+        </>
 
         {showPlot ? (
-          <PlotComponent data={data} selectedCol={selectedCol} IbyI0={IbyI0} />
+          <div ref={plotRef}>
+            <p>
+              <Checkbox
+                checked={isYscaleLog}
+                onChange={HandleIsYscaleLog}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+              Plot Y-scale in logarithmic scale.
+            </p>
+              <PlotComponent
+                data={data}
+                selectedCol={selectedCol}
+                IbyI0={IbyI0}
+                isYscaleLog={isYscaleLog}
+              />
+          </div>
         ) : null}
 
         <br />
         <br />
 
         {showData ? (
-          <div>
-            {data.length && IbyI0 ? (
-              <table>
-                <tbody>
-                  <tr>
-                    <th>{selectedCol.xCol || "X-col"}</th>
-                    {selectedCol.I0Col ? (
+          data.length ? (
+            selectedCol.I0Col ? (
+              IbyI0 ? (
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>{selectedCol.xCol || "X-col"}</th>
                       <th>
                         {selectedCol.ICol + " / " + selectedCol.I0Col ||
                           "I-col / I0-col"}
                       </th>
-                    ) : (
-                      <th>{selectedCol.ICol || "I-col"}</th>
-                    )}
-                  </tr>
-                  <RenderTable data={data} />
-                </tbody>
-              </table>
-            ) : null}
-
-            {data.length && !IbyI0 ? (
+                    </tr>
+                    <RenderTable data={data} />
+                  </tbody>
+                </table>
+              ) : (
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>{selectedCol.xCol || "X-col"}</th>
+                      <th>{selectedCol.ICol || "X-col"}</th>
+                      <th>{selectedCol.I0Col || "I0-Col"}</th>
+                    </tr>
+                    <RenderTable data={data} />
+                  </tbody>
+                </table>
+              )
+            ) : (
               <table>
                 <tbody>
                   <tr>
                     <th>{selectedCol.xCol || "X-col"}</th>
-                    <th>{selectedCol.ICol || "X-col"}</th>
-                    <th>{selectedCol.I0Col || "I0-Col"}</th>
+                    <th>{selectedCol.ICol || "I-col"}</th>
                   </tr>
                   <RenderTable data={data} />
                 </tbody>
               </table>
-            ) : null}
-          </div>
+            )
+          ) : (
+            <Alert severity="error">No data to show!</Alert>
+          )
         ) : null}
       </div>
       <footer>
