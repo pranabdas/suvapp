@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useState, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
+import { useDropzone } from "react-dropzone";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
@@ -30,29 +31,32 @@ function App() {
   const [isYscaleLog, setIsYscaleLog] = useState(false);
   const plotRef = useRef();
 
-  const HandleUpload = (e) => {
-    const fname = e.target.files[0].name;
-    setFilename(fname);
-    const reader = new FileReader();
-    reader.readAsText(e.target.files[0]);
-    reader.onload = async (e) => {
-      const text = e.target.result;
-      const content = text.split("\n");
-      setContent(content);
+  const onDrop = useCallback((acceptedFiles) => {
+    acceptedFiles.forEach((file) => {
+      setFilename(file.name);
+      const reader = new FileReader();
 
-      let tmpScan = [],
-        scanLine = [];
+      reader.readAsText(file);
+      reader.onload = async () => {
+        const text = reader.result;
+        const content = text.split("\n");
+        setContent(content);
 
-      for (let ii = 0; ii < content.length; ii++) {
-        if (content[ii].split(" ")[0] === "#S") {
-          tmpScan.push(parseInt(content[ii].split(" ")[1]));
-          scanLine.push(ii + 1);
+        let tmpScan = [],
+          scanLine = [];
+
+        for (let ii = 0; ii < content.length; ii++) {
+          if (content[ii].split(" ")[0] === "#S") {
+            tmpScan.push(parseInt(content[ii].split(" ")[1]));
+            scanLine.push(ii + 1);
+          }
         }
-      }
 
-      setScan(tmpScan);
-      setScanLine(scanLine);
-    };
+        setScan(tmpScan);
+        setScanLine(scanLine);
+      };
+    });
+
     setData([]);
     setScan([]);
     setSelectedScan(null);
@@ -65,10 +69,11 @@ function App() {
     setIbyI0(true);
     setShowPlot(false);
     setShowData(false);
-  };
+  }, []);
 
-  const handleSelect = (e) => {
-    e.preventDefault();
+  const { getRootProps, getInputProps } = useDropzone({ onDrop, maxFiles: 1 });
+
+  const handleSelectScan = (e) => {
     const selectedScan = parseInt(e.target.value);
 
     const selectedScanIndex = scan.indexOf(selectedScan);
@@ -92,6 +97,23 @@ function App() {
       }
     }
 
+    // if column header is missing, assign numerical labels
+    if (!tmpColNames.length) {
+      let singleDataRow;
+
+      for (let ii = lineStart; ii < lineEnd; ii++) {
+        if (content[ii][0] !== "#" && content[ii]) {
+          singleDataRow = content[ii].split(" ");
+          singleDataRow = singleDataRow.filter((x) => x);
+          break;
+        }
+      }
+
+      for (let ii = 0; ii < singleDataRow.length; ii++) {
+        tmpColNames.push("Col." + (ii + 1));
+      }
+    }
+
     setColNames(tmpColNames);
     setSelectedScan(selectedScan);
     setShowPlot(false);
@@ -101,7 +123,6 @@ function App() {
   };
 
   const handleSelectCol = (e) => {
-    e.preventDefault();
     const value = e.target.value;
     const name = e.target.name;
 
@@ -164,12 +185,13 @@ function App() {
         ]);
       }
     }
+
     setData(tmpData);
     setShowPlot(false);
     setShowData(true);
   };
 
-  const HandleCheckbox = (e) => {
+  const HandleIbyI0 = (e) => {
     setData([]);
     setShowPlot(false);
     setShowData(false);
@@ -180,8 +202,8 @@ function App() {
     setIsYscaleLog(e.target.checked);
 
     // setting showPlot to false and then immediately to true in order to force
-    // render the PlotComponent, otherwise sometimes the footer is hidden behind
-    // the plot.
+    // rerender the PlotComponent, otherwise sometimes the footer is hidden
+    // behind the plot.
     setShowPlot(false);
     setTimeout(() => {
       setShowPlot(true);
@@ -195,7 +217,9 @@ function App() {
 
   const SetShowPlot = () => {
     setShowPlot(!showPlot);
-    setShowData(false);
+    if (showData) {
+      setShowData(false);
+    }
     setTimeout(() => {
       plotRef.current.scrollIntoView({ behavior: "smooth" });
     }, 10);
@@ -243,6 +267,9 @@ function App() {
   };
 
   const CopyData = () => {
+    // every component under App will re-render upon any state changes
+    // consider disabling Plot component while click copy button
+    // setShowPlot(false);
     setTimeout(() => {
       setShowCopied(false);
     }, 1500);
@@ -274,18 +301,37 @@ function App() {
       <div className="wrapper">
         <h3 style={{ color: "#15847b" }}>Convert SUV beamline data</h3>
         <hr />
-        <br />
-        <form className="form">
-          <p>
-            Select data file:&emsp;
-            <input
-              type="file"
-              onChange={HandleUpload}
-              style={{ width: "300px", cursor: "pointer" }}
-              title="Select file"
-            />
-          </p>
-        </form>
+
+        <div {...getRootProps()}>
+          <input {...getInputProps()} />
+          {filename ? (
+            <div className="dropzone">
+              <p>
+                Selected file: <b>{filename}</b>
+                <br />
+              </p>
+              <p style={{ color: "grey", fontSize: "0.9em" }}>
+                <i>
+                  (If required, you can drop a new file in this box again, or
+                  click to browse)
+                </i>
+              </p>
+            </div>
+          ) : (
+            <div
+              className="dropzone"
+              style={{ paddingTop: "5em", paddingBottom: "5em" }}
+            >
+              <p>
+                <b>Drop</b> your data file in this box, or <b>click</b> here to
+                select.
+              </p>
+              <p style={{ color: "grey", fontSize: "0.9em" }}>
+                <i>(Please drop or select a single file)</i>
+              </p>
+            </div>
+          )}
+        </div>
 
         {filename ? (
           scan.length ? (
@@ -296,15 +342,17 @@ function App() {
           ) : (
             <Alert severity="error">
               <b>No</b> scans found in the file <b>{filename}</b>. Please ensure
-              SPEC/FOURC data format. A sample data file can be found <a href="https://suv.netlify.app/data.txt">here</a>.
+              SPEC/FOURC data format. A reference data file can be found{" "}
+              <a href="https://suv.netlify.app/data.txt">here</a>.
             </Alert>
           )
         ) : null}
 
+        <br />
+
         {scan.length ? (
           <>
-            <br />
-            <p>Select scan :</p>
+            <p>Please select scan number:</p>
             <Box sx={{ m: 1, minWidth: 120 }}>
               <FormControl fullWidth>
                 <InputLabel id="scan">Scan</InputLabel>
@@ -313,7 +361,7 @@ function App() {
                   id="scan"
                   value={selectedScan || ""}
                   label="Scan"
-                  onChange={handleSelect}
+                  onChange={handleSelectScan}
                 >
                   {scan.map((item, key) => (
                     <MenuItem value={item} key={key}>
@@ -398,34 +446,32 @@ function App() {
               </FormControl>
             </>
           ) : (
-            <Alert severity="error">Oops column header missing!</Alert>
+            <Alert severity="error">Sorry could not resolve columns!</Alert>
           )
         ) : null}
 
         <br />
 
         {selectedCol.ICol && selectedCol.I0Col ? (
-          <>
-            <p>
-              <Checkbox
-                checked={IbyI0}
-                onChange={HandleCheckbox}
-                inputProps={{ "aria-label": "controlled" }}
-              />
-              I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
-              columns separately.
-            </p>
-          </>
+          <p>
+            <Checkbox
+              checked={IbyI0}
+              onChange={HandleIbyI0}
+              inputProps={{ "aria-label": "controlled" }}
+            />
+            I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
+            columns separately.
+          </p>
         ) : null}
 
         {selectedCol.xCol && selectedCol.ICol ? (
           <button onClick={ProcessData} className="btn">
-            Process Data
+            Process data
           </button>
         ) : null}
 
         <br />
-        <br />
+
         {data.length ? (
           <>
             <button onClick={SaveData} className="btn">
@@ -434,54 +480,49 @@ function App() {
             <button onClick={CopyData} className="btn">
               {showCopied ? "Data copied" : "Copy data"}
             </button>
+
+            {showData ? (
+              <button onClick={SetShowData} className="btn">
+                Hide table
+              </button>
+            ) : (
+              <button onClick={SetShowData} className="btn">
+                Show table
+              </button>
+            )}
+
+            {showPlot ? (
+              <button onClick={SetShowPlot} className="btn">
+                Hide plot
+              </button>
+            ) : (
+              <button onClick={SetShowPlot} className="btn">
+                Show plot
+              </button>
+            )}
           </>
         ) : null}
 
-        <>
-          <br />
-          {showData && data.length ? (
-            <button onClick={SetShowData} className="btn">
-              Hide Data
-            </button>
-          ) : null}
-
-          {!showData && data.length ? (
-            <button onClick={SetShowData} className="btn">
-              Show Data
-            </button>
-          ) : null}
-
-          {showPlot && data.length ? (
-            <button onClick={SetShowPlot} className="btn">
-              Hide Plot
-            </button>
-          ) : null}
-
-          {!showPlot && data.length ? (
-            <button onClick={SetShowPlot} className="btn">
-              Show Plot
-            </button>
-          ) : null}
-        </>
-
-        {showPlot ? (
-          <div ref={plotRef}>
-            <p>
-              <Checkbox
-                checked={isYscaleLog}
-                onChange={HandleIsYscaleLog}
-                inputProps={{ "aria-label": "controlled" }}
-              />
-              Plot Y-scale in logarithmic scale.
-            </p>
+        <div ref={plotRef}>
+          {showPlot ? (
+            <>
+              <p>
+                <Checkbox
+                  checked={isYscaleLog}
+                  onChange={HandleIsYscaleLog}
+                  inputProps={{ "aria-label": "controlled" }}
+                />
+                Plot Y-scale in logarithmic scale.
+              </p>
               <PlotComponent
                 data={data}
                 selectedCol={selectedCol}
                 IbyI0={IbyI0}
                 isYscaleLog={isYscaleLog}
               />
-          </div>
-        ) : null}
+            </>
+          ) : null}
+        </div>
 
         <br />
         <br />
@@ -531,7 +572,6 @@ function App() {
         ) : null}
       </div>
       <footer>
-        {/* The previous version of the app is available <a href="./v1/">here</a>. */}
         Built and maintained by{" "}
         <a href="https://github.com/pranabdas/suvapp">Pranab Das</a>.
       </footer>

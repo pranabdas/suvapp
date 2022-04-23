@@ -13,6 +13,7 @@
     "plotly.js-basic-dist-min": "^2.11.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-dropzone": "^12.0.5",
     "react-plotly.js": "^2.5.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
