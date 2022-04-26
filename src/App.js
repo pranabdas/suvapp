@@ -102,7 +102,7 @@ function App() {
       let singleDataRow;
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
-        if (content[ii][0] !== "#" && content[ii]) {
+        if (content[ii][0] !== "#" && content[ii].trim()) {
           singleDataRow = content[ii].split(" ");
           singleDataRow = singleDataRow.filter((x) => x);
           break;
@@ -141,7 +141,7 @@ function App() {
     if (selectedScanIndex === scan.length - 1) {
       lineEnd = content.length;
     } else {
-      lineEnd = scanLine[selectedScanIndex + 1];
+      lineEnd = scanLine[selectedScanIndex + 1] - 1;
     }
 
     let lineData = [],
@@ -149,7 +149,7 @@ function App() {
       tmpData = [];
 
     for (let ii = lineStart; ii < lineEnd; ii++) {
-      if (content[ii][0] !== "#" && content[ii]) {
+      if (content[ii][0] !== "#" && content[ii].trim()) {
         lineData = content[ii].split(" ");
         lineData = lineData.filter((x) => x);
         fullData.push(lineData);
@@ -172,7 +172,7 @@ function App() {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
           parseFloat(fullData[ii][IColIndex]) /
-            parseFloat(fullData[ii][I0ColIndex]),
+          parseFloat(fullData[ii][I0ColIndex]),
         ]);
       }
     } else if (!IbyI0 && selectedCol.I0Col) {
