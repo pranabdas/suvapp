@@ -1,7 +1,7 @@
 import Plotly from "plotly.js-basic-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 
-function PlotComponent({ data, selectedCol, IbyI0, isYscaleLog }) {
+function PlotComponent({ data, selectedCol, isYbyZ, isYscaleLog }) {
   const Plot = createPlotlyComponent(Plotly);
   let xdata = [],
     ydata = [];
@@ -14,14 +14,14 @@ function PlotComponent({ data, selectedCol, IbyI0, isYscaleLog }) {
   const xlabel = selectedCol.xCol;
   let ylabel = "Y-data";
 
-  if (selectedCol.I0Col) {
-    if (IbyI0) {
-      ylabel = selectedCol.ICol + " / " + selectedCol.I0Col;
+  if (selectedCol.zCol) {
+    if (isYbyZ) {
+      ylabel = selectedCol.yCol + " / " + selectedCol.zCol;
     } else {
-      ylabel = selectedCol.ICol;
+      ylabel = selectedCol.yCol;
     }
   } else {
-    ylabel = selectedCol.ICol;
+    ylabel = selectedCol.yCol;
   }
 
   const trace = [

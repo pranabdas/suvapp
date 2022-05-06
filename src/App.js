@@ -20,11 +20,11 @@ function App() {
   const [colNames, setColNames] = useState([]);
   const [selectedCol, setSelectedCol] = useState({
     xCol: "",
-    ICol: "",
-    I0Col: "",
+    yCol: "",
+    zCol: "",
   });
   const [data, setData] = useState([]);
-  const [IbyI0, setIbyI0] = useState(true);
+  const [isYbyZ, setIsYbyZ] = useState(true);
   const [showPlot, setShowPlot] = useState(false);
   const [showData, setShowData] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
@@ -63,10 +63,10 @@ function App() {
     setColNames([]);
     setSelectedCol({
       xCol: "",
-      ICol: "",
-      I0Col: "",
+      yCol: "",
+      zCol: "",
     });
-    setIbyI0(true);
+    setIsYbyZ(true);
     setShowPlot(false);
     setShowData(false);
   }, []);
@@ -118,7 +118,7 @@ function App() {
     setSelectedScan(selectedScan);
     setShowPlot(false);
     setShowData(false);
-    setIbyI0(true);
+    setIsYbyZ(true);
     setData([]);
   };
 
@@ -130,7 +130,7 @@ function App() {
     setData([]);
     setShowPlot(false);
     setShowData(false);
-    setIbyI0(true);
+    setIsYbyZ(true);
   };
 
   const ProcessData = () => {
@@ -157,31 +157,31 @@ function App() {
     }
 
     const xColIndex = colNames.indexOf(selectedCol.xCol);
-    const IColIndex = colNames.indexOf(selectedCol.ICol);
+    const yColIndex = colNames.indexOf(selectedCol.yCol);
 
-    if (!selectedCol.I0Col) {
+    if (!selectedCol.zCol) {
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
-          parseFloat(fullData[ii][IColIndex]),
+          parseFloat(fullData[ii][yColIndex]),
         ]);
       }
-    } else if (IbyI0) {
-      const I0ColIndex = colNames.indexOf(selectedCol.I0Col);
+    } else if (isYbyZ) {
+      const zColIndex = colNames.indexOf(selectedCol.zCol);
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
-          parseFloat(fullData[ii][IColIndex]) /
-          parseFloat(fullData[ii][I0ColIndex]),
+          parseFloat(fullData[ii][yColIndex]) /
+          parseFloat(fullData[ii][zColIndex]),
         ]);
       }
-    } else if (!IbyI0 && selectedCol.I0Col) {
-      const I0ColIndex = colNames.indexOf(selectedCol.I0Col);
+    } else if (!isYbyZ && selectedCol.zCol) {
+      const zColIndex = colNames.indexOf(selectedCol.zCol);
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
-          parseFloat(fullData[ii][IColIndex]),
-          parseFloat(fullData[ii][I0ColIndex]),
+          parseFloat(fullData[ii][yColIndex]),
+          parseFloat(fullData[ii][zColIndex]),
         ]);
       }
     }
@@ -191,11 +191,11 @@ function App() {
     setShowData(true);
   };
 
-  const HandleIbyI0 = (e) => {
+  const HandleYbyZ = (e) => {
     setData([]);
     setShowPlot(false);
     setShowData(false);
-    setIbyI0(e.target.checked);
+    setIsYbyZ(e.target.checked);
   };
 
   const HandleIsYscaleLog = (e) => {
@@ -343,7 +343,9 @@ function App() {
             <Alert severity="error">
               <b>No</b> scans found in the file <b>{filename}</b>. Please ensure
               SPEC/FOURC data format. A reference data file can be found{" "}
-              <a href="https://suv.netlify.app/data.txt">here</a>.
+              <a href="https://suv.netlify.app/data.txt">here</a>. If you think
+              it could be a bug, please file an issue via{" "}
+              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.
             </Alert>
           )
         ) : null}
@@ -404,12 +406,12 @@ function App() {
               </FormControl>
 
               <FormControl required sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="ICol">I-col</InputLabel>
+                <InputLabel id="yCol">Y-col</InputLabel>
                 <Select
-                  name="ICol"
-                  id="ICol"
-                  value={selectedCol.ICol || ""}
-                  label="I-Col"
+                  name="yCol"
+                  id="yCol"
+                  value={selectedCol.yCol || ""}
+                  label="Y-Col"
                   onChange={handleSelectCol}
                 >
                   <MenuItem value="">
@@ -424,14 +426,14 @@ function App() {
               </FormControl>
 
               <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="I0Col">
-                  I<sub>0</sub>-col
+                <InputLabel id="zCol">
+                  Z-col
                 </InputLabel>
                 <Select
-                  name="I0Col"
-                  id="I0Col"
-                  value={selectedCol.I0Col || ""}
-                  label="I0-Col"
+                  name="zCol"
+                  id="zCol"
+                  value={selectedCol.zCol || ""}
+                  label="Z-Col"
                   onChange={handleSelectCol}
                 >
                   <MenuItem value="">
@@ -446,25 +448,26 @@ function App() {
               </FormControl>
             </>
           ) : (
-            <Alert severity="error">Sorry could not resolve columns!</Alert>
+            <Alert severity="error">Sorry could not resolve columns! If you think
+              it could be a bug, please file an issue via{" "}
+              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.</Alert>
           )
         ) : null}
 
         <br />
 
-        {selectedCol.ICol && selectedCol.I0Col ? (
+        {selectedCol.yCol && selectedCol.zCol ? (
           <p>
             <Checkbox
-              checked={IbyI0}
-              onChange={HandleIbyI0}
+              checked={isYbyZ}
+              onChange={HandleYbyZ}
               inputProps={{ "aria-label": "controlled" }}
             />
-            I want to export I/I<sub>0</sub>, instead of I and I<sub>0</sub>{" "}
-            columns separately.
+            I want to export Y/Z, instead of Y and Z columns separately.
           </p>
         ) : null}
 
-        {selectedCol.xCol && selectedCol.ICol ? (
+        {selectedCol.xCol && selectedCol.yCol ? (
           <button onClick={ProcessData} className="btn">
             Process data
           </button>
@@ -504,7 +507,7 @@ function App() {
         ) : null}
 
         <div ref={plotRef}>
-          {showPlot ? (
+          {showPlot && (
             <>
               <p>
                 <Checkbox
@@ -512,32 +515,32 @@ function App() {
                   onChange={HandleIsYscaleLog}
                   inputProps={{ "aria-label": "controlled" }}
                 />
-                Plot Y-scale in logarithmic scale.
+                Plot Y-axis in logarithmic scale.
               </p>
               <PlotComponent
                 data={data}
                 selectedCol={selectedCol}
-                IbyI0={IbyI0}
+                isYbyZ={isYbyZ}
                 isYscaleLog={isYscaleLog}
               />
             </>
-          ) : null}
+          )}
         </div>
 
         <br />
         <br />
 
-        {showData ? (
+        {showData && (
           data.length ? (
-            selectedCol.I0Col ? (
-              IbyI0 ? (
+            selectedCol.zCol ? (
+              isYbyZ ? (
                 <table>
                   <tbody>
                     <tr>
                       <th>{selectedCol.xCol || "X-col"}</th>
                       <th>
-                        {selectedCol.ICol + " / " + selectedCol.I0Col ||
-                          "I-col / I0-col"}
+                        {selectedCol.yCol + " / " + selectedCol.zCol ||
+                          "Y-col / Z-col"}
                       </th>
                     </tr>
                     <RenderTable data={data} />
@@ -548,8 +551,8 @@ function App() {
                   <tbody>
                     <tr>
                       <th>{selectedCol.xCol || "X-col"}</th>
-                      <th>{selectedCol.ICol || "X-col"}</th>
-                      <th>{selectedCol.I0Col || "I0-Col"}</th>
+                      <th>{selectedCol.yCol || "Y-col"}</th>
+                      <th>{selectedCol.zCol || "Z-Col"}</th>
                     </tr>
                     <RenderTable data={data} />
                   </tbody>
@@ -560,16 +563,18 @@ function App() {
                 <tbody>
                   <tr>
                     <th>{selectedCol.xCol || "X-col"}</th>
-                    <th>{selectedCol.ICol || "I-col"}</th>
+                    <th>{selectedCol.yCol || "Y-col"}</th>
                   </tr>
                   <RenderTable data={data} />
                 </tbody>
               </table>
             )
           ) : (
-            <Alert severity="error">No data to show!</Alert>
+            <Alert severity="error">No data to show! If you think
+              it could be a bug, please file an issue via{" "}
+              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.</Alert>
           )
-        ) : null}
+        )}
       </div>
       <footer>
         Built and maintained by{" "}
