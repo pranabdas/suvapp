@@ -24,7 +24,7 @@ function App() {
     zCol: "",
   });
   const [data, setData] = useState([]);
-  const [isYbyZ, setIsYbyZ] = useState(true);
+  const [isYbyZ, setIsYbyZ] = useState(false);
   const [showPlot, setShowPlot] = useState(false);
   const [showData, setShowData] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
@@ -47,7 +47,9 @@ function App() {
 
         for (let ii = 0; ii < content.length; ii++) {
           if (content[ii].split(" ")[0] === "#S") {
-            tmpScan.push(parseInt(content[ii].split(" ")[1]));
+            let tmpScanContent = content[ii].split(" ");
+            tmpScanContent.filter((x) => x);
+            tmpScan.push(parseInt(tmpScanContent[1]));
             scanLine.push(ii + 1);
           }
         }
@@ -66,7 +68,6 @@ function App() {
       yCol: "",
       zCol: "",
     });
-    setIsYbyZ(true);
     setShowPlot(false);
     setShowData(false);
   }, []);
@@ -118,7 +119,6 @@ function App() {
     setSelectedScan(selectedScan);
     setShowPlot(false);
     setShowData(false);
-    setIsYbyZ(true);
     setData([]);
   };
 
@@ -130,7 +130,6 @@ function App() {
     setData([]);
     setShowPlot(false);
     setShowData(false);
-    setIsYbyZ(true);
   };
 
   const ProcessData = () => {
@@ -426,9 +425,7 @@ function App() {
               </FormControl>
 
               <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="zCol">
-                  Z-col
-                </InputLabel>
+                <InputLabel id="zCol">Z-col</InputLabel>
                 <Select
                   name="zCol"
                   id="zCol"
@@ -448,9 +445,11 @@ function App() {
               </FormControl>
             </>
           ) : (
-            <Alert severity="error">Sorry could not resolve columns! If you think
-              it could be a bug, please file an issue via{" "}
-              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.</Alert>
+            <Alert severity="error">
+              Sorry could not resolve columns! If you think it could be a bug,
+              please file an issue via{" "}
+              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.
+            </Alert>
           )
         ) : null}
 
@@ -463,7 +462,8 @@ function App() {
               onChange={HandleYbyZ}
               inputProps={{ "aria-label": "controlled" }}
             />
-            I want to export Y/Z, instead of Y and Z columns separately.
+            I want to export <code>Y/Z</code>, instead of <code>Y</code> and{" "}
+            <code>Z</code> columns separately.
           </p>
         ) : null}
 
@@ -530,8 +530,8 @@ function App() {
         <br />
         <br />
 
-        {showData && (
-          data.length ? (
+        {showData &&
+          (data.length ? (
             selectedCol.zCol ? (
               isYbyZ ? (
                 <table>
@@ -570,11 +570,12 @@ function App() {
               </table>
             )
           ) : (
-            <Alert severity="error">No data to show! If you think
-              it could be a bug, please file an issue via{" "}
-              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.</Alert>
-          )
-        )}
+            <Alert severity="error">
+              No data to show! If you think it could be a bug, please file an
+              issue via{" "}
+              <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.
+            </Alert>
+          ))}
       </div>
       <footer>
         Built and maintained by{" "}
