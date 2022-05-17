@@ -28,7 +28,7 @@ function App() {
   const [showPlot, setShowPlot] = useState(false);
   const [showData, setShowData] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
-  const [isYscaleLog, setIsYscaleLog] = useState(false);
+  const [isYscaleLog, setYscaleLog] = useState(false);
   const plotRef = useRef();
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -120,6 +120,13 @@ function App() {
     setShowPlot(false);
     setShowData(false);
     setData([]);
+
+    // reset col selection if not in current scan
+    for (const key in selectedCol) {
+      if (selectedCol[key] && !tmpColNames.includes(selectedCol[key])) {
+        setSelectedCol({ ...selectedCol, [key]: "" });
+      }
+    }
   };
 
   const handleSelectCol = (e) => {
@@ -198,7 +205,7 @@ function App() {
   };
 
   const HandleIsYscaleLog = (e) => {
-    setIsYscaleLog(e.target.checked);
+    setYscaleLog(e.target.checked);
 
     // setting showPlot to false and then immediately to true in order to force
     // rerender the PlotComponent, otherwise sometimes the footer is hidden
@@ -298,7 +305,7 @@ function App() {
   return (
     <div className="container">
       <div className="wrapper">
-        <h3 style={{ color: "#15847b" }}>Convert SUV beamline data</h3>
+        <h3 style={{ color: "#15847b" }}>Convert SPEC/FOURC data</h3>
         <hr />
 
         <div {...getRootProps()}>
@@ -381,8 +388,8 @@ function App() {
           colNames.length ? (
             <>
               <p>
-                Select data columns (first and second columns are required, last
-                column is optional):
+                Select data columns (<code>X</code> and <code>Y</code> columns
+                are required, <code>Z</code> column is optional):
               </p>
               <FormControl required sx={{ m: 1, minWidth: 120 }} size="small">
                 <InputLabel id="xCol">X-col</InputLabel>
