@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, Suspense, lazy } from "react";
 import { useDropzone } from "react-dropzone";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -8,8 +8,11 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
-import PlotComponent from "./PlotComponent";
+import CircularProgress from "@mui/material/CircularProgress";
 import RenderTable from "./RenderTable";
+
+const PlotComponent = lazy(() => import("./PlotComponent"));
+const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
 function App() {
   const [filename, setFilename] = useState(null);
@@ -29,7 +32,10 @@ function App() {
   const [showData, setShowData] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [isYscaleLog, setYscaleLog] = useState(false);
+  const [is3dSurface, set3dSurface] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
   const plotRef = useRef();
+  const demoRef = useRef();
 
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
@@ -70,6 +76,7 @@ function App() {
     });
     setShowPlot(false);
     setShowData(false);
+    set3dSurface(false);
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop, maxFiles: 1 });
@@ -120,6 +127,7 @@ function App() {
     setShowPlot(false);
     setShowData(false);
     setData([]);
+    set3dSurface(false);
 
     // reset col selection if not in current scan
     for (const key in selectedCol) {
@@ -189,6 +197,29 @@ function App() {
           parseFloat(fullData[ii][yColIndex]),
           parseFloat(fullData[ii][zColIndex]),
         ]);
+      }
+    }
+
+    if (selectedCol.xCol && selectedCol.yCol && selectedCol.zCol && !isYbyZ) {
+      let xCol = [],
+        yCol = [],
+        zCol = [];
+
+      for (let ii = 0; ii < fullData.length; ii++) {
+        xCol.push(tmpData[ii][0]);
+        yCol.push(tmpData[ii][1]);
+        zCol.push(tmpData[ii][2]);
+      }
+
+      const xColUniq = xCol.filter(
+        (value, index, self) => self.indexOf(value) === index
+      );
+      const yColUniq = yCol.filter(
+        (value, index, self) => self.indexOf(value) === index
+      );
+
+      if (xColUniq.length * yColUniq.length === zCol.length) {
+        set3dSurface(true);
       }
     }
 
@@ -302,6 +333,19 @@ function App() {
     }
   };
 
+  const ShowLoading = () => {
+    return (
+      <>
+        <h4 style={{ fontWeight: "normal" }}>
+          Please wait! Loading...
+        </h4>
+        <Box>
+          <CircularProgress />
+        </Box>
+      </>
+    );
+  };
+
   return (
     <div className="container">
       <div className="wrapper">
@@ -338,6 +382,30 @@ function App() {
             </div>
           )}
         </div>
+
+        {!filename && !data.length && (
+          <div ref={demoRef} style={{ textAlign: "center" }}>
+            <button
+              onClick={() => {
+                setShowDemo(!showDemo);
+                setTimeout(() => {
+                  demoRef.current.scrollIntoView({ behavior: "smooth" });
+                }, 250);
+              }}
+              className="btn"
+            >
+              {showDemo ? "Hide Demo" : "Watch Demo"}
+            </button>
+            <br />
+            {showDemo && (
+              <img
+                src="./demo.gif"
+                alt="Demo"
+                width={"100%"}
+              />
+            )}
+          </div>
+        )}
 
         {filename ? (
           scan.length ? (
@@ -514,24 +582,41 @@ function App() {
         ) : null}
 
         <div ref={plotRef}>
-          {showPlot && (
-            <>
-              <p>
-                <Checkbox
-                  checked={isYscaleLog}
-                  onChange={HandleIsYscaleLog}
-                  inputProps={{ "aria-label": "controlled" }}
+          {showPlot &&
+            (is3dSurface ? (
+              <Suspense fallback={<ShowLoading />}>
+                <p>
+                  <Checkbox
+                    checked={isYscaleLog}
+                    onChange={HandleIsYscaleLog}
+                    inputProps={{ "aria-label": "controlled" }}
+                  />
+                  Plot Z-axis in logarithmic scale.
+                </p>
+                <Plot3dSurface
+                  data={data}
+                  selectedCol={selectedCol}
+                  isYscaleLog={isYscaleLog}
                 />
-                Plot Y-axis in logarithmic scale.
-              </p>
-              <PlotComponent
-                data={data}
-                selectedCol={selectedCol}
-                isYbyZ={isYbyZ}
-                isYscaleLog={isYscaleLog}
-              />
-            </>
-          )}
+              </Suspense>
+            ) : (
+              <Suspense fallback={<ShowLoading />}>
+                <p>
+                  <Checkbox
+                    checked={isYscaleLog}
+                    onChange={HandleIsYscaleLog}
+                    inputProps={{ "aria-label": "controlled" }}
+                  />
+                  Plot Y-axis in logarithmic scale.
+                </p>
+                <PlotComponent
+                  data={data}
+                  selectedCol={selectedCol}
+                  isYbyZ={isYbyZ}
+                  isYscaleLog={isYscaleLog}
+                />
+              </Suspense>
+            ))}
         </div>
 
         <br />
