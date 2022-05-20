@@ -201,6 +201,23 @@ footer {
   margin-bottom: 5px;
 }
 
+footer a:hover {
+  text-decoration: none;
+}
+
+.github-icon {
+  fill: rgba(0, 27, 61, 0.6);
+  text-decoration: none;
+}
+
+.github-icon svg {
+  transform: translate(0, 2px);
+}
+
+.github-icon:hover {
+  fill: var(--clr-primary);
+}
+
 select {
   font-size: 1em;
   background: rgb(231, 231, 231);
@@ -256,7 +273,7 @@ td {
 }
 
 .wrapper {
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 58px);
 }
 
 .dropzone {

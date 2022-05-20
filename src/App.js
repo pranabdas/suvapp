@@ -10,6 +10,7 @@ import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import RenderTable from "./RenderTable";
+import Footer from "./Footer";
 
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
@@ -40,9 +41,10 @@ function App() {
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       setFilename(file.name);
-      const reader = new FileReader();
 
+      const reader = new FileReader();
       reader.readAsText(file);
+
       reader.onload = async () => {
         const text = reader.result;
         const content = text.split("\n");
@@ -74,6 +76,7 @@ function App() {
       yCol: "",
       zCol: "",
     });
+
     setShowPlot(false);
     setShowData(false);
     set3dSurface(false);
@@ -83,7 +86,6 @@ function App() {
 
   const handleSelectScan = (e) => {
     const selectedScan = parseInt(e.target.value);
-
     const selectedScanIndex = scan.indexOf(selectedScan);
     const lineStart = scanLine[selectedScanIndex];
 
@@ -262,6 +264,7 @@ function App() {
     if (showData) {
       setShowData(false);
     }
+
     setTimeout(() => {
       plotRef.current.scrollIntoView({ behavior: "smooth" });
     }, 10);
@@ -342,7 +345,7 @@ function App() {
     return (
       <>
         <h4 style={{ fontWeight: "normal" }}>
-          Please wait! Loading...
+          Loading plot modules. Please wait...
         </h4>
         <Box>
           <CircularProgress />
@@ -354,9 +357,7 @@ function App() {
   return (
     <div className="container">
       <div className="wrapper">
-        <h3 style={{ color: "#15847b" }}>Convert SPEC/FOURC data</h3>
-        <hr />
-
+        <h3 style={{ color: "#15847b", textAlign: "center", paddingBottom: "0.5em" }}>Explore SPEC-FOURC Data</h3>
         <div {...getRootProps()}>
           <input {...getInputProps()} />
           {filename ? (
@@ -674,10 +675,7 @@ function App() {
             </Alert>
           ))}
       </div>
-      <footer>
-        Built and maintained by{" "}
-        <a href="https://github.com/pranabdas/suvapp">Pranab Das</a>.
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -83,9 +83,29 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
   ];
 
   const layout = {
-    xaxis: { title: xLabel },
-    yaxis: { title: yLabel },
-    zaxis: { title: zLabel },
+    title: "3D surface plot",
+    scene: {
+      xaxis: { title: { text: xLabel } },
+      yaxis: { title: { text: yLabel } },
+      zaxis: { title: { text: zLabel } },
+    },
+    font: { size: 14 },
+    autosize: false,
+    width: 600,
+    height: 600,
+    margin: {
+      l: 65,
+      r: 50,
+      b: 65,
+      t: 90,
+    },
+  };
+
+  const layoutContour = {
+    title: "Contour plot",
+    xaxis: { title: { text: xLabel } },
+    yaxis: { title: { text: yLabel } },
+    zaxis: { title: { text: zLabel } },
     font: { size: 14 },
     autosize: false,
     width: 600,
@@ -103,14 +123,14 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
       <Plot
         data={trace}
         config={{ responsive: true, displayModeBar: true }}
-        layout={{ ...layout, title: "3D surface plot" }}
+        layout={layout}
       />
 
       <br />
       <Plot
         data={contour}
         config={{ responsive: true, displayModeBar: true }}
-        layout={{ ...layout, title: "Contour plot" }}
+        layout={layoutContour}
       />
     </>
   );
