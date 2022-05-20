@@ -221,6 +221,8 @@ function App() {
 
       if (xColUniq.length * yColUniq.length === zCol.length) {
         set3dSurface(true);
+      } else {
+        set3dSurface(false);
       }
     } else {
       set3dSurface(false);
