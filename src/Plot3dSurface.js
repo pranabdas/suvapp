@@ -83,9 +83,9 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
   ];
 
   const layout = {
-    xaxis: { title: { text: xLabel } },
-    yaxis: { title: { text: yLabel } },
-    zaxis: { title: { text: zLabel } },
+    xaxis: { title: xLabel },
+    yaxis: { title: yLabel },
+    zaxis: { title: zLabel },
     font: { size: 14 },
     autosize: false,
     width: 600,
