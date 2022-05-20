@@ -200,6 +200,7 @@ function App() {
       }
     }
 
+    // detect 2D map data pattern
     if (selectedCol.xCol && selectedCol.yCol && selectedCol.zCol && !isYbyZ) {
       let xCol = [],
         yCol = [],
@@ -221,6 +222,8 @@ function App() {
       if (xColUniq.length * yColUniq.length === zCol.length) {
         set3dSurface(true);
       }
+    } else {
+      set3dSurface(false);
     }
 
     setData(tmpData);
