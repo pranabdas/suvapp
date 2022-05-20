@@ -342,7 +342,7 @@ function App() {
     return (
       <>
         <h4 style={{ fontWeight: "normal" }}>
-          Please wait! Loading...
+          Loading plot modules. Please wait...
         </h4>
         <Box>
           <CircularProgress />

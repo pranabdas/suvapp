@@ -35,8 +35,8 @@ function PlotComponent({ data, selectedCol, isYbyZ, isYscaleLog }) {
   ];
 
   let layout = {
-    xaxis: { title: xlabel },
-    yaxis: { title: ylabel },
+    xaxis: { title: { text: xlabel } },
+    yaxis: { title: { text: ylabel } },
     font: { size: 14 },
   };
 
