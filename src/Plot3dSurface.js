@@ -1,9 +1,8 @@
-// requires full version of Plotly
-// npm i plotly.js
-// build size becomes ~24MB
-import Plot from "react-plotly.js";
+import Plotly from "plotly.js/dist/plotly-suv.min.js";
+import createPlotlyComponent from "react-plotly.js/factory";
 
 function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
+  const Plot = createPlotlyComponent(Plotly);
   let xData = [],
     yData = [],
     zData = [];

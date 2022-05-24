@@ -15,6 +15,18 @@ import Footer from "./Footer";
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
+// Do not define a component inside another component, React treats such 
+// component as new component on each re-render making optimization impossible
+const ShowLoading = () => {
+  return (
+    <>
+      <Box style={{ fontSize: "1.1em", color: "grey" }}>
+        <CircularProgress size={24} /> Loading plot modules. Please wait...
+      </Box>
+    </>
+  );
+};
+
 function App() {
   const [filename, setFilename] = useState(null);
   const [content, setContent] = useState([]);
@@ -40,8 +52,6 @@ function App() {
 
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
-      setFilename(file.name);
-
       const reader = new FileReader();
       reader.readAsText(file);
 
@@ -65,6 +75,7 @@ function App() {
           }
         }
 
+        setFilename(file.name);
         setScan(tmpScan);
         setScanLine(scanLine);
       };
@@ -344,16 +355,6 @@ function App() {
     }
   };
 
-  const ShowLoading = () => {
-    return (
-      <>
-        <Box style={{ fontSize: "1.1em", color: "grey" }}>
-          <CircularProgress size={24} /> Loading plot modules. Please wait...
-        </Box>
-      </>
-    );
-  };
-
   return (
     <div className="container">
       <div className="wrapper">
@@ -556,13 +557,11 @@ function App() {
           </p>
         ) : null}
 
-        {selectedCol.xCol && selectedCol.yCol ? (
+        {selectedCol.xCol && selectedCol.yCol && !data.length ? (
           <button onClick={ProcessData} className="btn">
             Process data
           </button>
         ) : null}
-
-        <br />
 
         {data.length ? (
           <>
