@@ -55,10 +55,13 @@ function App() {
 
         for (let ii = 0; ii < content.length; ii++) {
           if (content[ii].split(" ")[0] === "#S") {
-            let tmpScanContent = content[ii].split(" ");
-            tmpScanContent.filter((x) => x);
-            tmpScan.push(parseInt(tmpScanContent[1]));
-            scanLine.push(ii + 1);
+            let tmpContent = content[ii].split(" ");
+            tmpContent.filter((x) => x);
+            let scanNumber = parseInt(tmpContent[1]);
+            if (!isNaN(scanNumber)) {
+              tmpScan.push(scanNumber);
+              scanLine.push(ii + 1);
+            }
           }
         }
 
@@ -344,11 +347,8 @@ function App() {
   const ShowLoading = () => {
     return (
       <>
-        <h4 style={{ fontWeight: "normal" }}>
-          Loading plot modules. Please wait...
-        </h4>
-        <Box>
-          <CircularProgress />
+        <Box style={{ fontSize: "1.1em", color: "grey" }}>
+          <CircularProgress size={24} /> Loading plot modules. Please wait...
         </Box>
       </>
     );
@@ -357,7 +357,15 @@ function App() {
   return (
     <div className="container">
       <div className="wrapper">
-        <h3 style={{ color: "#15847b", textAlign: "center", paddingBottom: "0.5em" }}>Explore SPEC-FOURC Data</h3>
+        <h3
+          style={{
+            color: "#15847b",
+            textAlign: "center",
+            paddingBottom: "0.5em",
+          }}
+        >
+          Explore SPEC-FOURC Data
+        </h3>
         <div {...getRootProps()}>
           <input {...getInputProps()} />
           {filename ? (
@@ -389,10 +397,12 @@ function App() {
           )}
         </div>
 
-        {!filename && !data.length && (
+        {!filename && (
           <div ref={demoRef} style={{ textAlign: "center" }}>
             <button
-              onClick={() => { setShowDemo(!showDemo); }}
+              onClick={() => {
+                setShowDemo(!showDemo);
+              }}
               className="btn"
             >
               {showDemo ? "Hide Demo" : "Watch Demo"}
@@ -405,14 +415,13 @@ function App() {
                 width={"100%"}
                 onLoad={() => {
                   demoRef.current.scrollIntoView({ behavior: "smooth" });
-                }
-                }
+                }}
               />
             )}
           </div>
         )}
 
-        {filename ? (
+        {filename && (
           scan.length ? (
             <Alert severity="success">
               <b>{scan.length}</b> {scan.length > 1 ? "scans" : "scan"} found in
@@ -427,7 +436,7 @@ function App() {
               <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.
             </Alert>
           )
-        ) : null}
+        )}
 
         <br />
 
