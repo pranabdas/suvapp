@@ -211,11 +211,13 @@ footer a:hover {
 }
 
 .github-icon svg {
-  transform: translate(0, 2px);
+  transform: translate(0, 4px);
+  /* transition: transform .25s; */
 }
 
-.github-icon:hover {
-  fill: var(--clr-primary);
+.github-icon svg:hover {
+  /* transform: scale(1.1); */
+  fill: black;
 }
 
 select {
@@ -273,7 +275,7 @@ td {
 }
 
 .wrapper {
-  min-height: calc(100vh - 58px);
+  min-height: calc(100vh - 4em);
 }
 
 .dropzone {
