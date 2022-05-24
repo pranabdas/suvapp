@@ -392,12 +392,7 @@ function App() {
         {!filename && !data.length && (
           <div ref={demoRef} style={{ textAlign: "center" }}>
             <button
-              onClick={() => {
-                setShowDemo(!showDemo);
-                setTimeout(() => {
-                  demoRef.current.scrollIntoView({ behavior: "smooth" });
-                }, 250);
-              }}
+              onClick={() => { setShowDemo(!showDemo); }}
               className="btn"
             >
               {showDemo ? "Hide Demo" : "Watch Demo"}
@@ -408,6 +403,10 @@ function App() {
                 src="./demo.gif"
                 alt="Demo"
                 width={"100%"}
+                onLoad={() => {
+                  demoRef.current.scrollIntoView({ behavior: "smooth" });
+                }
+                }
               />
             )}
           </div>
