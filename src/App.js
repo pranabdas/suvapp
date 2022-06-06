@@ -15,7 +15,7 @@ import Footer from "./Footer";
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
-// Do not define a component inside another component, React treats such 
+// Do not define a component inside another component, React treats such
 // component as new component on each re-render making optimization impossible
 const ShowLoading = () => {
   return (
@@ -60,8 +60,8 @@ function App() {
         const content = text.split("\n");
         setContent(content);
 
-        let tmpScan = [],
-          scanLine = [];
+        let tmpScan = [];
+        let scanLine = [];
 
         for (let ii = 0; ii < content.length; ii++) {
           if (content[ii].split(" ")[0] === "#S") {
@@ -122,7 +122,7 @@ function App() {
     }
 
     // if column header is missing, assign numerical labels
-    if (!tmpColNames.length) {
+    if (!(tmpColNames.length > 0)) {
       let singleDataRow;
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
@@ -163,7 +163,7 @@ function App() {
     setShowData(false);
   };
 
-  const ProcessData = () => {
+  const processData = () => {
     const selectedScanIndex = scan.indexOf(selectedScan);
     const lineStart = scanLine[selectedScanIndex];
 
@@ -174,9 +174,9 @@ function App() {
       lineEnd = scanLine[selectedScanIndex + 1] - 1;
     }
 
-    let lineData = [],
-      fullData = [],
-      tmpData = [];
+    let lineData = [];
+    let fullData = [];
+    let tmpData = [];
 
     for (let ii = lineStart; ii < lineEnd; ii++) {
       if (content[ii][0] !== "#" && content[ii].trim()) {
@@ -189,7 +189,7 @@ function App() {
     const xColIndex = colNames.indexOf(selectedCol.xCol);
     const yColIndex = colNames.indexOf(selectedCol.yCol);
 
-    if (!selectedCol.zCol) {
+    if (selectedCol.zCol === "") {
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
@@ -202,10 +202,10 @@ function App() {
         tmpData.push([
           parseFloat(fullData[ii][xColIndex]),
           parseFloat(fullData[ii][yColIndex]) /
-          parseFloat(fullData[ii][zColIndex]),
+            parseFloat(fullData[ii][zColIndex]),
         ]);
       }
-    } else if (!isYbyZ && selectedCol.zCol) {
+    } else if (!isYbyZ && selectedCol.zCol !== "") {
       const zColIndex = colNames.indexOf(selectedCol.zCol);
       for (let ii = 0; ii < fullData.length; ii++) {
         tmpData.push([
@@ -217,16 +217,21 @@ function App() {
     }
 
     // detect 2D map data pattern
-    if (selectedCol.xCol && selectedCol.yCol && selectedCol.zCol && !isYbyZ) {
-      let xCol = [],
-        yCol = [],
-        zCol = [];
+    if (
+      selectedCol.xCol !== "" &&
+      selectedCol.yCol !== "" &&
+      selectedCol.zCol !== "" &&
+      !isYbyZ
+    ) {
+      let xCol = [];
+      let yCol = [];
+      let zCol = [];
 
-      for (let ii = 0; ii < fullData.length; ii++) {
-        xCol.push(tmpData[ii][0]);
-        yCol.push(tmpData[ii][1]);
-        zCol.push(tmpData[ii][2]);
-      }
+      tmpData.forEach((row) => {
+        xCol.push(row[0]);
+        yCol.push(row[1]);
+        zCol.push(row[2]);
+      });
 
       const xColUniq = xCol.filter(
         (value, index, self) => self.indexOf(value) === index
@@ -249,14 +254,14 @@ function App() {
     setShowData(true);
   };
 
-  const HandleYbyZ = (e) => {
+  const handleYbyZ = (e) => {
     setData([]);
     setShowPlot(false);
     setShowData(false);
     setIsYbyZ(e.target.checked);
   };
 
-  const HandleIsYscaleLog = (e) => {
+  const handleIsYscaleLog = (e) => {
     setYscaleLog(e.target.checked);
 
     // setting showPlot to false and then immediately to true in order to force
@@ -273,7 +278,7 @@ function App() {
     }, 200);
   };
 
-  const SetShowPlot = () => {
+  const handleShowPlot = () => {
     setShowPlot(!showPlot);
     if (showData) {
       setShowData(false);
@@ -284,12 +289,12 @@ function App() {
     }, 10);
   };
 
-  const SetShowData = () => {
+  const handleShowData = () => {
     setShowData(!showData);
     setShowPlot(false);
   };
 
-  const SaveData = () => {
+  const saveData = () => {
     let outFilename;
     const dim = data[0].length;
 
@@ -325,7 +330,7 @@ function App() {
     element.click();
   };
 
-  const CopyData = () => {
+  const copyData = () => {
     // every component under App will re-render upon any state changes
     // consider disabling Plot component while click copy button
     // setShowPlot(false);
@@ -334,7 +339,7 @@ function App() {
     }, 1500);
 
     const dim = data[0].length;
-    if (data.length) {
+    if (data.length > 0) {
       let dataContent = "";
 
       for (let ii = 0; ii < data.length; ii++) {
@@ -422,8 +427,8 @@ function App() {
           </div>
         )}
 
-        {filename && (
-          scan.length ? (
+        {filename &&
+          (scan.length > 0 ? (
             <Alert severity="success">
               <b>{scan.length}</b> {scan.length > 1 ? "scans" : "scan"} found in
               the file <b>{filename}</b>.
@@ -436,12 +441,11 @@ function App() {
               it could be a bug, please file an issue via{" "}
               <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.
             </Alert>
-          )
-        )}
+          ))}
 
         <br />
 
-        {scan.length ? (
+        {scan.length > 0 ? (
           <>
             <p>Please select scan number:</p>
             <Box sx={{ m: 1, minWidth: 120 }}>
@@ -467,8 +471,8 @@ function App() {
 
         <br />
 
-        {selectedScan ? (
-          colNames.length ? (
+        {selectedScan &&
+          (colNames.length > 0 ? (
             <>
               <p>
                 Select data columns (<code>X</code> and <code>Y</code> columns
@@ -540,59 +544,60 @@ function App() {
               please file an issue via{" "}
               <a href="https://github.com/pranabdas/suvapp/issues">GitHub</a>.
             </Alert>
-          )
-        ) : null}
+          ))}
 
         <br />
 
-        {selectedCol.yCol && selectedCol.zCol ? (
+        {selectedCol.yCol !== "" && selectedCol.zCol !== "" && (
           <p>
             <Checkbox
               checked={isYbyZ}
-              onChange={HandleYbyZ}
+              onChange={handleYbyZ}
               inputProps={{ "aria-label": "controlled" }}
             />
             I want to export <code>Y/Z</code>, instead of <code>Y</code> and{" "}
             <code>Z</code> columns separately.
           </p>
-        ) : null}
+        )}
 
-        {selectedCol.xCol && selectedCol.yCol && !data.length ? (
-          <button onClick={ProcessData} className="btn">
-            Process data
-          </button>
-        ) : null}
+        {selectedCol.xCol !== "" &&
+          selectedCol.yCol !== "" &&
+          !(data.length > 0) && (
+            <button onClick={processData} className="btn">
+              Process data
+            </button>
+          )}
 
-        {data.length ? (
+        {data.length > 0 && (
           <>
-            <button onClick={SaveData} className="btn">
+            <button onClick={saveData} className="btn">
               Save data
             </button>
-            <button onClick={CopyData} className="btn">
+            <button onClick={copyData} className="btn">
               {showCopied ? "Data copied" : "Copy data"}
             </button>
 
             {showData ? (
-              <button onClick={SetShowData} className="btn">
+              <button onClick={handleShowData} className="btn">
                 Hide table
               </button>
             ) : (
-              <button onClick={SetShowData} className="btn">
+              <button onClick={handleShowData} className="btn">
                 Show table
               </button>
             )}
 
             {showPlot ? (
-              <button onClick={SetShowPlot} className="btn">
+              <button onClick={handleShowPlot} className="btn">
                 Hide plot
               </button>
             ) : (
-              <button onClick={SetShowPlot} className="btn">
+              <button onClick={handleShowPlot} className="btn">
                 Show plot
               </button>
             )}
           </>
-        ) : null}
+        )}
 
         <div ref={plotRef}>
           {showPlot &&
@@ -601,7 +606,7 @@ function App() {
                 <p>
                   <Checkbox
                     checked={isYscaleLog}
-                    onChange={HandleIsYscaleLog}
+                    onChange={handleIsYscaleLog}
                     inputProps={{ "aria-label": "controlled" }}
                   />
                   Plot Z-axis in logarithmic scale.
@@ -617,7 +622,7 @@ function App() {
                 <p>
                   <Checkbox
                     checked={isYscaleLog}
-                    onChange={HandleIsYscaleLog}
+                    onChange={handleIsYscaleLog}
                     inputProps={{ "aria-label": "controlled" }}
                   />
                   Plot Y-axis in logarithmic scale.
@@ -636,8 +641,8 @@ function App() {
         <br />
 
         {showData &&
-          (data.length ? (
-            selectedCol.zCol ? (
+          (data.length > 0 ? (
+            selectedCol.zCol !== "" ? (
               isYbyZ ? (
                 <table>
                   <tbody>

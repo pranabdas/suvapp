@@ -3,21 +3,19 @@ import createPlotlyComponent from "react-plotly.js/factory";
 
 function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
   const Plot = createPlotlyComponent(Plotly);
-  let xData = [],
-    yData = [],
-    zData = [];
+  let xData = [];
+  let yData = [];
+  let zData = [];
 
-  for (let ii = 0; ii < data.length; ii++) {
-    xData.push(data[ii][0]);
-    yData.push(data[ii][1]);
-    zData.push(data[ii][2]);
-  }
-
-  if (isYscaleLog) {
-    for (let ii = 0; ii < zData.length; ii++) {
-      zData[ii] = Math.log10(zData[ii]);
+  data.forEach((row) => {
+    xData.push(row[0]);
+    yData.push(row[1]);
+    if (isYscaleLog) {
+      zData.push(Math.log10(row[2]));
+    } else {
+      zData.push(row[2]);
     }
-  }
+  });
 
   let xDataUniq = xData.filter(
     (value, index, self) => self.indexOf(value) === index
@@ -35,13 +33,10 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
   }
 
   let zDataFinal = [];
+  let zeros = Array(xDataUniq.length).fill(0);
 
   for (let ii = 0; ii < yDataUniq.length; ii++) {
-    let row = [];
-    for (let jj = 0; jj < xDataUniq.length; jj++) {
-      row.push(0);
-    }
-    zDataFinal.push(row);
+    zDataFinal.push([...zeros]);
   }
 
   for (let ii = 0; ii < data.length; ii++) {
@@ -50,9 +45,7 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
     zDataFinal[yIndex][xIndex] = zData[ii];
   }
 
-  const xLabel = selectedCol.xCol,
-    yLabel = selectedCol.yCol,
-    zLabel = selectedCol.zCol;
+  const { xCol, yCol, zCol } = selectedCol;
 
   const trace = [
     {
@@ -84,9 +77,9 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
   const layout = {
     title: "3D surface plot",
     scene: {
-      xaxis: { title: { text: xLabel } },
-      yaxis: { title: { text: yLabel } },
-      zaxis: { title: { text: zLabel } },
+      xaxis: { title: { text: xCol } },
+      yaxis: { title: { text: yCol } },
+      zaxis: { title: { text: zCol } },
     },
     font: { size: 14 },
     autosize: false,
@@ -102,9 +95,9 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
 
   const layoutContour = {
     title: "Contour plot",
-    xaxis: { title: { text: xLabel } },
-    yaxis: { title: { text: yLabel } },
-    zaxis: { title: { text: zLabel } },
+    xaxis: { title: { text: xCol } },
+    yaxis: { title: { text: yCol } },
+    zaxis: { title: { text: zCol } },
     font: { size: 14 },
     autosize: false,
     width: 600,
