@@ -24,14 +24,6 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
     (value, index, self) => self.indexOf(value) === index
   );
 
-  for (let ii = 0; ii < xDataUniq.length; ii++) {
-    xDataUniq[ii] = parseFloat(xDataUniq[ii]);
-  }
-
-  for (let ii = 0; ii < yDataUniq.length; ii++) {
-    yDataUniq[ii] = parseFloat(yDataUniq[ii]);
-  }
-
   let zDataFinal = [];
   let zeros = Array(xDataUniq.length).fill(0);
 

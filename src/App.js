@@ -21,7 +21,7 @@ const ShowLoading = () => {
   return (
     <>
       <Box style={{ fontSize: "1.1em", color: "grey" }}>
-        <CircularProgress size={24} /> Loading plot modules. Please wait...
+        <CircularProgress size={18} /> Loading plot modules. Please wait...
       </Box>
     </>
   );
