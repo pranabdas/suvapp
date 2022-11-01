@@ -23,7 +23,6 @@ is available [here](https://suv.netlify.app/data.txt).
 <img src="./public/demo.gif" alt="demo">
 
 
-
 ### Privacy
 This is a client side application. All data are processed in your device
 locally. Your data is never sent over to any remote server. Once the webapp is
