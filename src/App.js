@@ -15,18 +15,6 @@ import Footer from "./Footer";
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
-// Do not define a component inside another component, React treats such
-// component as new component on each re-render making optimization impossible
-const ShowLoading = () => {
-  return (
-    <>
-      <Box style={{ fontSize: "1.1em", color: "grey" }}>
-        <CircularProgress size={18} /> Loading plot modules. Please wait...
-      </Box>
-    </>
-  );
-};
-
 function App() {
   const [filename, setFilename] = useState(null);
   const [content, setContent] = useState([]);
@@ -57,15 +45,15 @@ function App() {
 
       reader.onload = async () => {
         const text = reader.result;
-        const content = text.split("\n");
+        const content = splitByLineBreaks(text);
         setContent(content);
 
         let tmpScan = [];
         let scanLine = [];
 
         for (let ii = 0; ii < content.length; ii++) {
-          if (content[ii].split(" ")[0] === "#S") {
-            let tmpContent = content[ii].split(" ");
+          if (splitByWhiteSpaces(content[ii])[0] === "#S") {
+            let tmpContent = splitByWhiteSpaces(content[ii]);
             tmpContent.filter((x) => x);
             let scanNumber = parseInt(tmpContent[1]);
             if (!isNaN(scanNumber)) {
@@ -112,10 +100,11 @@ function App() {
 
     let tmpColNames = [];
     for (let ii = lineStart; ii < lineEnd; ii++) {
-      if (content[ii].slice(0, 2) === "#L") {
+      if (content[ii].trim().slice(0, 2) === "#L") {
         tmpColNames = content[ii];
-        tmpColNames = tmpColNames.split(" ");
-        tmpColNames = tmpColNames.filter((x) => x);
+        tmpColNames = splitByWhiteSpaces(tmpColNames);
+        tmpColNames = tmpColNames.filter((x) => x); // not necessary as
+        // splitByWhiteSpaces would eliminate any empty values
         tmpColNames.shift();
         break;
       }
@@ -126,8 +115,8 @@ function App() {
       let singleDataRow;
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
-        if (content[ii][0] !== "#" && content[ii].trim()) {
-          singleDataRow = content[ii].split(" ");
+        if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
+          singleDataRow = splitByWhiteSpaces(content[ii]);
           singleDataRow = singleDataRow.filter((x) => x);
           break;
         }
@@ -179,8 +168,8 @@ function App() {
     let tmpData = [];
 
     for (let ii = lineStart; ii < lineEnd; ii++) {
-      if (content[ii][0] !== "#" && content[ii].trim()) {
-        lineData = content[ii].split(" ");
+      if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
+        lineData = splitByWhiteSpaces(content[ii]);
         lineData = lineData.filter((x) => x);
         fullData.push(lineData);
       }
@@ -691,5 +680,34 @@ function App() {
     </div>
   );
 }
+
+// Do not define a React component inside another, React would create such
+// components as new on each re-render hindering optimizations
+const ShowLoading = () => {
+  return (
+    <>
+      <Box style={{ fontSize: "1.1em", color: "grey" }}>
+        <CircularProgress size={16} /> Loading plot modules. Please wait...
+      </Box>
+    </>
+  );
+};
+
+const splitByLineBreaks = (content) => {
+  return content
+    .replace(/\r/g, "\n") // replace carriage return `\r` to `\n`
+    .replace(/[\n]+/g, "\n") // replace multiple `\n` by single `\n`
+    .replace(/^\n/, "") // trim any new line character in the beginning
+    .replace(/\n$/, "") // trim any new line character at the end
+    .split("\n");
+};
+
+const splitByWhiteSpaces = (line) => {
+  return line
+  .replace(/\t/g, " ") // replace tab character by space
+  .replace(/[\s]+/g, " ") // replace multiple space characters by single one
+  .trim() // trim any beginning or trailing spaces
+  .split(/\s/);
+};
 
 export default App;

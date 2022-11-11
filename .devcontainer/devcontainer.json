@@ -24,7 +24,8 @@
     "esbenp.prettier-vscode",
     "bceskavich.theme-dracula-at-night",
     "streetsidesoftware.code-spell-checker",
-    "SirTori.indenticator"
+    "SirTori.indenticator",
+    "mutantdino.resourcemonitor"
   ],
   "features": {
     "node": {
