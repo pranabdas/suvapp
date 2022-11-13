@@ -1,16 +1,39 @@
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponent from "react-plotly.js/factory";
+import { Data, PlotData, Layout } from "plotly.js";
 
-function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
+interface SurfacePlotData extends PlotData {
+  contours: {
+    z: {
+      show: boolean;
+      usecolormap: boolean;
+      project: { z: boolean };
+    };
+  };
+}
+
+interface LayoutContour extends Layout {
+  zaxis: { title: { text: string } };
+}
+
+function Plot3dSurface({
+  data,
+  selectedCol,
+  isYScaleLog,
+}: {
+  data: number[][];
+  selectedCol: { [key: string]: string };
+  isYScaleLog: boolean;
+}): JSX.Element {
   const Plot = createPlotlyComponent(Plotly);
-  let xData = [];
-  let yData = [];
-  let zData = [];
+  let xData: number[] = [];
+  let yData: number[] = [];
+  let zData: number[] = [];
 
   data.forEach((row) => {
     xData.push(row[0]);
     yData.push(row[1]);
-    if (isYscaleLog) {
+    if (isYScaleLog) {
       zData.push(Math.log10(row[2]));
     } else {
       zData.push(row[2]);
@@ -24,11 +47,11 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
     (value, index, self) => self.indexOf(value) === index
   );
 
-  let zDataFinal = [];
-  let zeros = Array(xDataUniq.length).fill(0);
+  let zDataFinal: number[][] = [];
+  let zeros: number[] = Array(xDataUniq.length).fill(0);
 
   for (let ii = 0; ii < yDataUniq.length; ii++) {
-    zDataFinal.push([...zeros]);
+    zDataFinal.push([...zeros]); // make deep copies instead of mutating
   }
 
   for (let ii = 0; ii < data.length; ii++) {
@@ -39,7 +62,7 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
 
   const { xCol, yCol, zCol } = selectedCol;
 
-  const trace = [
+  const trace: Partial<SurfacePlotData>[] = [
     {
       x: xDataUniq,
       y: yDataUniq,
@@ -56,7 +79,7 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
     },
   ];
 
-  const contour = [
+  const contour: Data[] = [
     {
       x: xDataUniq,
       y: yDataUniq,
@@ -66,7 +89,7 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
     },
   ];
 
-  const layout = {
+  const layout: Partial<Layout> = {
     title: "3D surface plot",
     scene: {
       xaxis: { title: { text: xCol } },
@@ -85,7 +108,7 @@ function Plot3dSurface({ data, selectedCol, isYscaleLog }) {
     },
   };
 
-  const layoutContour = {
+  const layoutContour: Partial<LayoutContour> = {
     title: "Contour plot",
     xaxis: { title: { text: xCol } },
     yaxis: { title: { text: yCol } },

@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import RenderTable from "./RenderTable";
@@ -15,46 +15,49 @@ import Footer from "./Footer";
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
-function App() {
-  const [filename, setFilename] = useState(null);
-  const [content, setContent] = useState([]);
-  const [scan, setScan] = useState([]);
-  const [scanLine, setScanLine] = useState([]);
-  const [selectedScan, setSelectedScan] = useState(null);
-  const [colNames, setColNames] = useState([]);
-  const [selectedCol, setSelectedCol] = useState({
+function App(): JSX.Element {
+  const [filename, setFilename] = useState("");
+  const [content, setContent] = useState<string[]>([]);
+  const [scan, setScan] = useState<number[]>([]);
+  const [scanLine, setScanLine] = useState<number[]>([]);
+  const [selectedScan, setSelectedScan] = useState<number | null>(null);
+  const [colNames, setColNames] = useState<string[]>([]);
+  const [selectedCol, setSelectedCol] = useState<{ [key: string]: string }>({
     xCol: "",
     yCol: "",
     zCol: "",
   });
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<number[][]>([]);
   const [isYbyZ, setIsYbyZ] = useState(false);
   const [showPlot, setShowPlot] = useState(false);
   const [showData, setShowData] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
-  const [isYscaleLog, setYscaleLog] = useState(false);
+  const [isYScaleLog, setYScaleLog] = useState(false);
   const [is3dSurface, set3dSurface] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
-  const plotRef = useRef();
-  const demoRef = useRef();
+  const plotRef = useRef<null | HTMLElement>(null);
+  const demoRef = useRef<null | HTMLElement>(null);
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.readAsText(file);
 
+      let content: string[];
       reader.onload = async () => {
-        const text = reader.result;
-        const content = splitByLineBreaks(text);
-        setContent(content);
+        const text = reader.result?.toString();
+        if (text !== undefined) {
+          content = splitByLineBreaks(text);
+          setContent(content);
+        }
 
-        let tmpScan = [];
-        let scanLine = [];
+        let tmpScan: number[] = [];
+        let scanLine: number[] = [];
 
         for (let ii = 0; ii < content.length; ii++) {
           if (splitByWhiteSpaces(content[ii])[0] === "#S") {
             let tmpContent = splitByWhiteSpaces(content[ii]);
-            tmpContent.filter((x) => x);
+            tmpContent.filter((x: string) => x);
             let scanNumber = parseInt(tmpContent[1]);
             if (!isNaN(scanNumber)) {
               tmpScan.push(scanNumber);
@@ -86,23 +89,22 @@ function App() {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop, maxFiles: 1 });
 
-  const handleSelectScan = (e) => {
+  const handleSelectScan = (e: SelectChangeEvent) => {
     const selectedScan = parseInt(e.target.value);
     const selectedScanIndex = scan.indexOf(selectedScan);
     const lineStart = scanLine[selectedScanIndex];
 
-    let lineEnd;
+    let lineEnd: number;
     if (selectedScanIndex === scan.length - 1) {
       lineEnd = content.length;
     } else {
       lineEnd = scanLine[selectedScanIndex + 1];
     }
 
-    let tmpColNames = [];
+    let tmpColNames: string[] = [];
     for (let ii = lineStart; ii < lineEnd; ii++) {
       if (content[ii].trim().slice(0, 2) === "#L") {
-        tmpColNames = content[ii];
-        tmpColNames = splitByWhiteSpaces(tmpColNames);
+        tmpColNames = splitByWhiteSpaces(content[ii]);
         tmpColNames = tmpColNames.filter((x) => x); // not necessary as
         // splitByWhiteSpaces would eliminate any empty values
         tmpColNames.shift();
@@ -112,7 +114,7 @@ function App() {
 
     // if column header is missing, assign numerical labels
     if (!(tmpColNames.length > 0)) {
-      let singleDataRow;
+      let singleDataRow: string[] = [];
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
         if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
@@ -142,7 +144,7 @@ function App() {
     }
   };
 
-  const handleSelectCol = (e) => {
+  const handleSelectCol = (e: SelectChangeEvent) => {
     const value = e.target.value;
     const name = e.target.name;
 
@@ -153,105 +155,107 @@ function App() {
   };
 
   const processData = () => {
-    const selectedScanIndex = scan.indexOf(selectedScan);
-    const lineStart = scanLine[selectedScanIndex];
+    if (selectedScan !== null && isFinite(selectedScan)) {
+      let selectedScanIndex: number;
+      selectedScanIndex = scan.indexOf(selectedScan);
+      const lineStart = scanLine[selectedScanIndex];
 
-    let lineEnd;
-    if (selectedScanIndex === scan.length - 1) {
-      lineEnd = content.length;
-    } else {
-      lineEnd = scanLine[selectedScanIndex + 1] - 1;
-    }
-
-    let lineData = [];
-    let fullData = [];
-    let tmpData = [];
-
-    for (let ii = lineStart; ii < lineEnd; ii++) {
-      if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
-        lineData = splitByWhiteSpaces(content[ii]);
-        lineData = lineData.filter((x) => x);
-        fullData.push(lineData);
+      let lineEnd: number;
+      if (selectedScanIndex === scan.length - 1) {
+        lineEnd = content.length;
+      } else {
+        lineEnd = scanLine[selectedScanIndex + 1] - 1;
       }
-    }
 
-    const xColIndex = colNames.indexOf(selectedCol.xCol);
-    const yColIndex = colNames.indexOf(selectedCol.yCol);
+      let lineData: string[] = [];
+      let fullData: string[][] = [];
+      let tmpData: number[][] = [];
 
-    if (selectedCol.zCol === "") {
-      for (let ii = 0; ii < fullData.length; ii++) {
-        tmpData.push([
-          parseFloat(fullData[ii][xColIndex]),
-          parseFloat(fullData[ii][yColIndex]),
-        ]);
+      for (let ii = lineStart; ii < lineEnd; ii++) {
+        if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
+          lineData = splitByWhiteSpaces(content[ii]);
+          lineData = lineData.filter((x) => x);
+          fullData.push(lineData);
+        }
       }
-    } else if (isYbyZ) {
-      const zColIndex = colNames.indexOf(selectedCol.zCol);
-      for (let ii = 0; ii < fullData.length; ii++) {
-        tmpData.push([
-          parseFloat(fullData[ii][xColIndex]),
-          parseFloat(fullData[ii][yColIndex]) /
+      const xColIndex = colNames.indexOf(selectedCol.xCol);
+      const yColIndex = colNames.indexOf(selectedCol.yCol);
+
+      if (selectedCol.zCol === "") {
+        for (let ii = 0; ii < fullData.length; ii++) {
+          tmpData.push([
+            parseFloat(fullData[ii][xColIndex]),
+            parseFloat(fullData[ii][yColIndex]),
+          ]);
+        }
+      } else if (isYbyZ) {
+        const zColIndex = colNames.indexOf(selectedCol.zCol);
+        for (let ii = 0; ii < fullData.length; ii++) {
+          tmpData.push([
+            parseFloat(fullData[ii][xColIndex]),
+            parseFloat(fullData[ii][yColIndex]) /
+              parseFloat(fullData[ii][zColIndex]),
+          ]);
+        }
+      } else if (!isYbyZ && selectedCol.zCol !== "") {
+        const zColIndex = colNames.indexOf(selectedCol.zCol);
+        for (let ii = 0; ii < fullData.length; ii++) {
+          tmpData.push([
+            parseFloat(fullData[ii][xColIndex]),
+            parseFloat(fullData[ii][yColIndex]),
             parseFloat(fullData[ii][zColIndex]),
-        ]);
+          ]);
+        }
       }
-    } else if (!isYbyZ && selectedCol.zCol !== "") {
-      const zColIndex = colNames.indexOf(selectedCol.zCol);
-      for (let ii = 0; ii < fullData.length; ii++) {
-        tmpData.push([
-          parseFloat(fullData[ii][xColIndex]),
-          parseFloat(fullData[ii][yColIndex]),
-          parseFloat(fullData[ii][zColIndex]),
-        ]);
-      }
-    }
 
-    // detect 2D map data pattern
-    if (
-      selectedCol.xCol !== "" &&
-      selectedCol.yCol !== "" &&
-      selectedCol.zCol !== "" &&
-      !isYbyZ
-    ) {
-      let xCol = [];
-      let yCol = [];
-      let zCol = [];
+      // detect 2D map data pattern
+      if (
+        selectedCol.xCol !== "" &&
+        selectedCol.yCol !== "" &&
+        selectedCol.zCol !== "" &&
+        !isYbyZ
+      ) {
+        let xCol: number[] = [];
+        let yCol: number[] = [];
+        let zCol: number[] = [];
 
-      tmpData.forEach((row) => {
-        xCol.push(row[0]);
-        yCol.push(row[1]);
-        zCol.push(row[2]);
-      });
+        tmpData.forEach((row) => {
+          xCol.push(row[0]);
+          yCol.push(row[1]);
+          zCol.push(row[2]);
+        });
 
-      const xColUniq = xCol.filter(
-        (value, index, self) => self.indexOf(value) === index
-      );
-      const yColUniq = yCol.filter(
-        (value, index, self) => self.indexOf(value) === index
-      );
+        const xColUniq = xCol.filter(
+          (value, index, self) => self.indexOf(value) === index
+        );
+        const yColUniq = yCol.filter(
+          (value, index, self) => self.indexOf(value) === index
+        );
 
-      if (xColUniq.length * yColUniq.length === zCol.length) {
-        set3dSurface(true);
+        if (xColUniq.length * yColUniq.length === zCol.length) {
+          set3dSurface(true);
+        } else {
+          set3dSurface(false);
+        }
       } else {
         set3dSurface(false);
       }
-    } else {
-      set3dSurface(false);
-    }
 
-    setData(tmpData);
-    setShowPlot(false);
-    setShowData(true);
+      setData(tmpData);
+      setShowPlot(false);
+      setShowData(true);
+    }
   };
 
-  const handleYbyZ = (e) => {
+  const handleYbyZ = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData([]);
     setShowPlot(false);
     setShowData(false);
     setIsYbyZ(e.target.checked);
   };
 
-  const handleIsYscaleLog = (e) => {
-    setYscaleLog(e.target.checked);
+  const handleIsYScaleLog = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setYScaleLog(e.target.checked);
 
     // setting showPlot to false and then immediately to true in order to force
     // rerender the PlotComponent, otherwise sometimes the footer is hidden
@@ -263,7 +267,7 @@ function App() {
 
     // without setTimeout scrollIntoView seems not working
     setTimeout(() => {
-      plotRef.current.scrollIntoView({ behavior: "smooth" });
+      plotRef.current!.scrollIntoView({ behavior: "smooth" });
     }, 200);
   };
 
@@ -274,7 +278,7 @@ function App() {
     }
 
     setTimeout(() => {
-      plotRef.current.scrollIntoView({ behavior: "smooth" });
+      plotRef.current!.scrollIntoView({ behavior: "smooth" });
     }, 10);
   };
 
@@ -392,8 +396,11 @@ function App() {
           )}
         </div>
 
-        {!filename && (
-          <div ref={demoRef} style={{ textAlign: "center" }}>
+        {filename === "" && (
+          <div
+            ref={demoRef as React.RefObject<HTMLDivElement>}
+            style={{ textAlign: "center" }}
+          >
             <button
               onClick={() => {
                 setShowDemo(!showDemo);
@@ -409,14 +416,14 @@ function App() {
                 alt="Demo"
                 width={"100%"}
                 onLoad={() => {
-                  demoRef.current.scrollIntoView({ behavior: "smooth" });
+                  demoRef.current!.scrollIntoView({ behavior: "smooth" });
                 }}
               />
             )}
           </div>
         )}
 
-        {filename &&
+        {filename !== "" &&
           (scan.length > 0 ? (
             <Alert severity="success">
               <b>{scan.length}</b> {scan.length > 1 ? "scans" : "scan"} found in
@@ -434,7 +441,7 @@ function App() {
 
         <br />
 
-        {scan.length > 0 ? (
+        {scan.length > 0 && (
           <>
             <p>Please select scan number:</p>
             <Box sx={{ m: 1, minWidth: 120 }}>
@@ -443,7 +450,7 @@ function App() {
                 <Select
                   labelId="scan"
                   id="scan"
-                  value={selectedScan || ""}
+                  value={selectedScan?.toString() || ""}
                   label="Scan"
                   onChange={handleSelectScan}
                 >
@@ -456,11 +463,12 @@ function App() {
               </FormControl>
             </Box>
           </>
-        ) : null}
+        )}
 
         <br />
 
-        {selectedScan &&
+        {selectedScan !== null &&
+          isFinite(selectedScan) &&
           (colNames.length > 0 ? (
             <>
               <p>
@@ -588,14 +596,14 @@ function App() {
           </>
         )}
 
-        <div ref={plotRef}>
+        <div ref={plotRef as React.RefObject<HTMLDivElement>}>
           {showPlot &&
             (is3dSurface ? (
               <Suspense fallback={<ShowLoading />}>
                 <p>
                   <Checkbox
-                    checked={isYscaleLog}
-                    onChange={handleIsYscaleLog}
+                    checked={isYScaleLog}
+                    onChange={handleIsYScaleLog}
                     inputProps={{ "aria-label": "controlled" }}
                   />
                   Plot Z-axis in logarithmic scale.
@@ -603,15 +611,15 @@ function App() {
                 <Plot3dSurface
                   data={data}
                   selectedCol={selectedCol}
-                  isYscaleLog={isYscaleLog}
+                  isYScaleLog={isYScaleLog}
                 />
               </Suspense>
             ) : (
               <Suspense fallback={<ShowLoading />}>
                 <p>
                   <Checkbox
-                    checked={isYscaleLog}
-                    onChange={handleIsYscaleLog}
+                    checked={isYScaleLog}
+                    onChange={handleIsYScaleLog}
                     inputProps={{ "aria-label": "controlled" }}
                   />
                   Plot Y-axis in logarithmic scale.
@@ -620,7 +628,7 @@ function App() {
                   data={data}
                   selectedCol={selectedCol}
                   isYbyZ={isYbyZ}
-                  isYscaleLog={isYscaleLog}
+                  isYScaleLog={isYScaleLog}
                 />
               </Suspense>
             ))}
@@ -683,7 +691,7 @@ function App() {
 
 // Do not define a React component inside another, React would create such
 // components as new on each re-render hindering optimizations
-const ShowLoading = () => {
+const ShowLoading = (): JSX.Element => {
   return (
     <>
       <Box style={{ fontSize: "1.1em", color: "grey" }}>
@@ -693,21 +701,21 @@ const ShowLoading = () => {
   );
 };
 
-const splitByLineBreaks = (content) => {
+const splitByLineBreaks = (content: string) => {
   return content
-    .replace(/\r/g, "\n") // replace carriage return `\r` to `\n`
-    .replace(/[\n]+/g, "\n") // replace multiple `\n` by single `\n`
-    .replace(/^\n/, "") // trim any new line character in the beginning
+    .replace(/\r/g, "\n") // convert carriage return `\r` to `\n`
+    .replace(/[\n]+/g, "\n") // replace multiple consecutive `\n` by single `\n`
+    .replace(/^\n/, "") // remove any new line character at the beginning
     .replace(/\n$/, "") // trim any new line character at the end
     .split("\n");
 };
 
-const splitByWhiteSpaces = (line) => {
+const splitByWhiteSpaces = (line: string) => {
   return line
-  .replace(/\t/g, " ") // replace tab character by space
-  .replace(/[\s]+/g, " ") // replace multiple space characters by single one
-  .trim() // trim any beginning or trailing spaces
-  .split(/\s/);
+    .replace(/\t/g, " ") // replace tab character by space
+    .replace(/[\s]+/g, " ") // replace multiple space characters by single one
+    .trim() // trim any beginning or trailing spaces
+    .split(/\s/);
 };
 
 export default App;

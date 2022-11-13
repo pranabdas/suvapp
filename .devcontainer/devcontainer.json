@@ -13,7 +13,9 @@
     "files.trimTrailingWhitespace": true,
     "editor.fontSize": 14,
     "editor.minimap.enabled": false,
-    "editor.rulers": [80],
+    "editor.rulers": [
+      80
+    ],
     "workbench.colorCustomizations": {
       "editorRuler.foreground": "#fdb88056"
     },
@@ -31,5 +33,7 @@
     "node": {
       "version": "18"
     }
-  }
+  },
+  "postCreateCommand": "npm install && bash plotly-custom-build.sh",
+  "waitFor": "postCreateCommand"
 }
