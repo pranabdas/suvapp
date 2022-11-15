@@ -9,8 +9,10 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
+import { sha256 } from "crypto-hash";
 import RenderTable from "./RenderTable";
 import Footer from "./Footer";
+import ConsoleTests from "./ConsoleTests";
 
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
@@ -35,6 +37,7 @@ function App(): JSX.Element {
   const [isYScaleLog, setYScaleLog] = useState(false);
   const [is3dSurface, set3dSurface] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+  const [SHA256, setSHA256] = useState("");
   const plotRef = useRef<null | HTMLElement>(null);
   const demoRef = useRef<null | HTMLElement>(null);
 
@@ -47,6 +50,7 @@ function App(): JSX.Element {
       reader.onload = async () => {
         const text = reader.result?.toString();
         if (text !== undefined) {
+          setSHA256(await sha256(text));
           content = splitByLineBreaks(text);
           setContent(content);
         }
@@ -125,7 +129,7 @@ function App(): JSX.Element {
       }
 
       for (let ii = 0; ii < singleDataRow.length; ii++) {
-        tmpColNames.push("Col." + (ii + 1));
+        tmpColNames.push("Col." + (ii + 1).toString());
       }
     }
 
@@ -244,6 +248,22 @@ function App(): JSX.Element {
       setData(tmpData);
       setShowPlot(false);
       setShowData(true);
+
+      // console tests
+      if (process.env.NODE_ENV === "development") {
+        console.log("Debug mode: ON");
+
+        if (
+          SHA256 !==
+          "f131a6ca6c57d8e57f6282c6d8ec36d765a3d40929f0a783184f795efbde8dcd"
+        ) {
+          console.log(
+            "Warning: File hash mismatch. Tests are based on the data file `Data.txt` included in the project under `public`."
+          );
+        }
+
+        ConsoleTests(tmpData, selectedScan);
+      }
     }
   };
 
