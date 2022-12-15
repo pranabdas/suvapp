@@ -50,7 +50,10 @@ function App(): JSX.Element {
       reader.onload = async () => {
         const text = reader.result?.toString();
         if (text !== undefined) {
-          setSHA256(await sha256(text));
+          // crypto-hash has issues on older firefox, use only in development
+          if (process.env.NODE_ENV === "development") {
+            setSHA256(await sha256(text));
+          }
           content = splitByLineBreaks(text);
           setContent(content);
         }
@@ -149,8 +152,7 @@ function App(): JSX.Element {
   };
 
   const handleSelectCol = (e: SelectChangeEvent) => {
-    const value = e.target.value;
-    const name = e.target.name;
+    const { name, value } = e.target;
 
     setSelectedCol({ ...selectedCol, [name]: value });
     setData([]);
@@ -257,7 +259,7 @@ function App(): JSX.Element {
           SHA256 !==
           "f131a6ca6c57d8e57f6282c6d8ec36d765a3d40929f0a783184f795efbde8dcd"
         ) {
-          console.log(
+          console.warn(
             "Warning: File hash mismatch. Tests are based on the data file `Data.txt` included in the project under `public`."
           );
         }

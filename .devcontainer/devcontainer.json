@@ -34,6 +34,6 @@
       "version": "18"
     }
   },
-  "postCreateCommand": "npm install && bash plotly-custom-build.sh",
+  "postCreateCommand": "bash plotly-custom-build.sh",
   "waitFor": "postCreateCommand"
 }

@@ -1,15 +1,42 @@
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponent from "react-plotly.js/factory";
-import { Data, PlotData, Layout } from "plotly.js";
+import { Data, PlotData, Layout, Font } from "plotly.js";
 
 interface SurfacePlotData extends PlotData {
-  contours: {
+  // https://plotly.com/javascript/reference/surface/#surface-contours
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/commit/f8f22d2d8d29bd896ff3e632262b84fb5fedd6e4
+  contours: Partial<{
+    coloring: "fill" | "heatmap" | "lines" | "none";
+    end: number;
+    labelfont: Partial<Font>;
+    labelformat: string;
+    operation:
+      | "="
+      | "<"
+      | ">="
+      | ">"
+      | "<="
+      | "[]"
+      | "()"
+      | "[)"
+      | "(]"
+      | "]["
+      | ")("
+      | "]("
+      | ")[";
+    showlabels: boolean;
+    showlines: boolean;
+    size: number;
+    start: number;
+    type: "levels" | "constraint";
+    value: number | [lowerBound: number, upperBound: number];
+    // https://plotly.com/javascript/reference/surface/#surface-contours-z
     z: {
       show: boolean;
       usecolormap: boolean;
       project: { z: boolean };
     };
-  };
+  }>;
 }
 
 interface LayoutContour extends Layout {
