@@ -1,37 +1,39 @@
 {
   "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04",
   // https://github.com/microsoft/vscode-dev-containers/tree/main/containers
-  "settings": {
-    "telemetry.telemetryLevel": "off",
-    "telemetry.enableCrashReporter": false,
-    "telemetry.enableTelemetry": false,
-    "workbench.settings.enableNaturalLanguageSearch": false,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.wordWrap": "on",
-    "editor.tabSize": 2,
-    "files.insertFinalNewline": true,
-    "files.trimTrailingWhitespace": true,
-    "editor.fontSize": 14,
-    "editor.minimap.enabled": false,
-    "editor.rulers": [
-      80
-    ],
-    "workbench.colorCustomizations": {
-      "editorRuler.foreground": "#fdb88056"
-    },
-    "workbench.colorTheme": "Dracula At Night",
-    "terminal.integrated.fontSize": 13
-  },
-  "extensions": [
-    "esbenp.prettier-vscode",
-    "bceskavich.theme-dracula-at-night",
-    "streetsidesoftware.code-spell-checker",
-    "SirTori.indenticator",
-    "mutantdino.resourcemonitor"
-  ],
-  "features": {
-    "node": {
-      "version": "18"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "telemetry.telemetryLevel": "off",
+        "telemetry.enableCrashReporter": false,
+        "telemetry.enableTelemetry": false,
+        "workbench.settings.enableNaturalLanguageSearch": false,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.wordWrap": "on",
+        "editor.tabSize": 2,
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": true,
+        "editor.fontSize": 14,
+        "editor.minimap.enabled": false,
+        "editor.rulers": [80],
+        "workbench.colorCustomizations": {
+          "editorRuler.foreground": "#fdb88056"
+        },
+        "workbench.colorTheme": "Dracula At Night",
+        "terminal.integrated.fontSize": 13
+      },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "bceskavich.theme-dracula-at-night",
+        "streetsidesoftware.code-spell-checker",
+        "SirTori.indenticator",
+        "mutantdino.resourcemonitor"
+      ],
+      "features": {
+        "node": {
+          "version": "18"
+        }
+      }
     }
   },
   "postCreateCommand": "bash plotly-custom-build.sh",
