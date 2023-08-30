@@ -39,7 +39,7 @@ const ConsoleTests = (data: number[][], scan: number | null) => {
     console.log("L value: data[839][1] =", data[839][1], status);
 
     status = data[839][2] === 39 ? "(Passed)" : "(Failed)";
-    console.log("Detector value: data[839][1] =", data[839][2], status);
+    console.log("Detector value: data[839][2] =", data[839][2], status);
   }
 };
 

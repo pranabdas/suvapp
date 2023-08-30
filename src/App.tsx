@@ -406,6 +406,7 @@ function App(): JSX.Element {
             <div
               className="dropzone"
               style={{ paddingTop: "5em", paddingBottom: "5em" }}
+              data-cy="file-upload"
             >
               <p>
                 <b>Drop</b> your data file in this box, or <b>click</b> here to
@@ -475,9 +476,10 @@ function App(): JSX.Element {
                   value={selectedScan?.toString() || ""}
                   label="Scan"
                   onChange={handleSelectScan}
+                  data-cy="select-scan"
                 >
                   {scan.map((item, key) => (
-                    <MenuItem value={item} key={key}>
+                    <MenuItem value={item} key={key} data-cy={`select-option-${item}`}>
                       {item}
                     </MenuItem>
                   ))}
@@ -505,12 +507,13 @@ function App(): JSX.Element {
                   value={selectedCol.xCol || ""}
                   label="X-Col"
                   onChange={handleSelectCol}
+                  data-cy="select-col-1"
                 >
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
                   {colNames.map((item, key) => (
-                    <MenuItem value={item} key={key}>
+                    <MenuItem value={item} key={key} data-cy={`col-1-${item}`}>
                       {item}
                     </MenuItem>
                   ))}
@@ -525,12 +528,13 @@ function App(): JSX.Element {
                   value={selectedCol.yCol || ""}
                   label="Y-Col"
                   onChange={handleSelectCol}
+                  data-cy="select-col-2"
                 >
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
                   {colNames.map((item, key) => (
-                    <MenuItem value={item} key={key}>
+                    <MenuItem value={item} key={key} data-cy={`col-2-${item}`}>
                       {item}
                     </MenuItem>
                   ))}
@@ -545,12 +549,13 @@ function App(): JSX.Element {
                   value={selectedCol.zCol || ""}
                   label="Z-Col"
                   onChange={handleSelectCol}
+                  data-cy="select-col-3"
                 >
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
                   {colNames.map((item, key) => (
-                    <MenuItem value={item} key={key}>
+                    <MenuItem value={item} key={key} data-cy={`col-3-${item}`}>
                       {item}
                     </MenuItem>
                   ))}
@@ -582,7 +587,7 @@ function App(): JSX.Element {
         {selectedCol.xCol !== "" &&
           selectedCol.yCol !== "" &&
           !(data.length > 0) && (
-            <button onClick={processData} className="btn">
+            <button onClick={processData} className="btn" data-cy="process-data-btn">
               Process data
             </button>
           )}
@@ -663,7 +668,7 @@ function App(): JSX.Element {
           (data.length > 0 ? (
             selectedCol.zCol !== "" ? (
               isYbyZ ? (
-                <table>
+                <table data-cy="data-table">
                   <tbody>
                     <tr>
                       <th>{selectedCol.xCol || "X-col"}</th>
@@ -676,7 +681,7 @@ function App(): JSX.Element {
                   </tbody>
                 </table>
               ) : (
-                <table>
+                <table data-cy="data-table">
                   <tbody>
                     <tr>
                       <th>{selectedCol.xCol || "X-col"}</th>
@@ -688,7 +693,7 @@ function App(): JSX.Element {
                 </table>
               )
             ) : (
-              <table>
+              <table data-cy="data-table">
                 <tbody>
                   <tr>
                     <th>{selectedCol.xCol || "X-col"}</th>
