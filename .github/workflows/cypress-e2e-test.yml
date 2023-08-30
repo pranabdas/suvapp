@@ -27,13 +27,11 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Install and build packages
-        run: bash plotly-custom-build.sh
-
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
           browser: ${{ matrix.browser }}
+          install-command: bash plotly-custom-build.sh
           start: npm start
           wait-on: "http://localhost:3000"
           wait-on-timeout: 300
