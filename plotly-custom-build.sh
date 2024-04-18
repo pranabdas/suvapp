@@ -1,3 +1,4 @@
+#!/bin/bash
 # https://github.com/plotly/plotly.js/blob/master/CUSTOM_BUNDLE.md
 CWD=${PWD}
 npm i

@@ -1,6 +1,10 @@
 {
-  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04",
-  // https://github.com/microsoft/vscode-dev-containers/tree/main/containers
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "node": {
+      "version": "20"
+    }
+  },
   "customizations": {
     "vscode": {
       "settings": {
@@ -28,12 +32,7 @@
         "streetsidesoftware.code-spell-checker",
         "SirTori.indenticator",
         "mutantdino.resourcemonitor"
-      ],
-      "features": {
-        "node": {
-          "version": "18"
-        }
-      }
+      ]
     }
   },
   "postCreateCommand": "bash plotly-custom-build.sh",
