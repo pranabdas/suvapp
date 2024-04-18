@@ -1,22 +1,33 @@
-name: E2E Tests Cypress
+name: Cypress E2E Tests
 
 on:
   push:
     branches:
-      - main
+      - "*"
   pull_request:
     branches:
       - main
 
 jobs:
   e2e-tests:
-    runs-on: ubuntu-latest
     permissions:
       contents: read
 
     strategy:
+      # when one test fails, DO NOT cancel the others
+      fail-fast: false
       matrix:
+        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
         browser: ["chrome", "firefox"]
+        include:
+          - os: "macos-latest"
+            browser: "electron"
+          - os: "ubuntu-latest"
+            browser: "chromium"
+          - os: "windows-latest"
+            browser: "edge"
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -28,7 +39,7 @@ jobs:
           node-version: "20"
 
       - name: Cypress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           browser: ${{ matrix.browser }}
           install-command: bash plotly-custom-build.sh
