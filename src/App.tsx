@@ -51,7 +51,7 @@ function App(): JSX.Element {
         const text = reader.result?.toString();
         if (text !== undefined) {
           // crypto-hash has issues on older firefox, use only in development
-          if (process.env.NODE_ENV === "development") {
+          if (import.meta.env.DEV) {
             setSHA256(await sha256(text));
           }
           content = splitByLineBreaks(text);
@@ -252,7 +252,7 @@ function App(): JSX.Element {
       setShowData(true);
 
       // console tests
-      if (process.env.NODE_ENV === "development") {
+      if (import.meta.env.DEV) {
         console.log("Debug mode: ON");
 
         if (

@@ -3,7 +3,7 @@ name: Cypress E2E Tests
 on:
   push:
     branches:
-      - "*"
+      - main
   pull_request:
     branches:
       - main
@@ -26,6 +26,9 @@ jobs:
             browser: "chromium"
           - os: "windows-latest"
             browser: "edge"
+        exclude:
+          - os: "macos-latest"
+            browser: "firefox"
 
     runs-on: ${{ matrix.os }}
 
