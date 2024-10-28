@@ -7,19 +7,19 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/material": "^6.1.4",
-    "@types/node": "^22.7.6",
-    "@types/react": "^18.3.11",
+    "@mui/material": "^6.1.5",
+    "@types/node": "^22.8.1",
+    "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react-swc": "^3.7.1",
     "crypto-hash": "^3.1.0",
     "plotly.js": "^2.35.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-dropzone": "^14.2.9",
+    "react-dropzone": "^14.2.10",
     "react-plotly.js": "^2.6.0",
     "typescript": "^5.6.3",
-    "vite": "^5.4.9",
+    "vite": "^5.4.10",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^5.0.1"
   },
@@ -46,8 +46,8 @@
     ]
   },
   "devDependencies": {
-    "@types/plotly.js": "^2.33.4",
+    "@types/plotly.js": "^2.33.5",
     "@types/react-plotly.js": "^2.6.3",
-    "cypress": "^13.15.0"
+    "cypress": "^13.15.1"
   }
 }
