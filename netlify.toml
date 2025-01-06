@@ -1,5 +1,10 @@
 [build]
-  command = "bash plotly-custom-build.sh && npm run build"
+  command = """
+  bash plotly-custom-build.sh
+  npm run build
+  bash set_headers.sh
+  """
+
   publish = "dist"
 
 [build.environment]
