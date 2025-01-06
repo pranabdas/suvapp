@@ -14,8 +14,10 @@ import RenderTable from "./RenderTable";
 import Footer from "./Footer";
 import ConsoleTests from "./ConsoleTests";
 
-const PlotComponent = lazy(() => import("./PlotComponent"));
-const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
+const PlotComponentPromise = import("./PlotComponent");
+const PlotComponent = lazy(() => PlotComponentPromise);
+const Plot3dSurfacePromise = import("./Plot3dSurface")
+const Plot3dSurface = lazy(() => Plot3dSurfacePromise);
 
 function App(): JSX.Element {
   const [filename, setFilename] = useState("");
