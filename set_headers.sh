@@ -4,7 +4,8 @@
 if [ -d dist ]; then
   cd dist
 else
-  npm run build
+  npm run build || ( bash plotly-custom-build.sh && npm run build )
+  cd dist
 fi
 
 if [ -f _headers ]; then rm _headers; fi
