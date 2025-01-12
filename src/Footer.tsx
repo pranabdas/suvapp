@@ -1,4 +1,4 @@
-function Footer(): JSX.Element {
+function Footer(): React.JSX.Element {
   return (
     <footer>
       <a href="https://github.com/pranabdas/suvapp" className="github-icon">

@@ -1,4 +1,4 @@
-function RenderTable({ data }: { data: number[][] }): JSX.Element {
+function RenderTable({ data }: { data: number[][] }): React.JSX.Element {
   return (
     <>
       {data.map((row, key) => (

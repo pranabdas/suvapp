@@ -12,7 +12,7 @@ function PlotComponent({
   selectedCol: { [key: string]: string };
   isYbyZ: boolean;
   isYScaleLog: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   // this is certainly a bad practice to define a component inside another
   // component, however Plotly itself does not follow all the react best
   // practices. At the moment defining Plot component outside of Plot3dSurface

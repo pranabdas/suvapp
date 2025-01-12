@@ -17,7 +17,7 @@ import ConsoleTests from "./ConsoleTests";
 const PlotComponent = lazy(() => import("./PlotComponent"));
 const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   const [filename, setFilename] = useState("");
   const [content, setContent] = useState<string[]>([]);
   const [scan, setScan] = useState<number[]>([]);
@@ -718,7 +718,7 @@ function App(): JSX.Element {
 
 // Do not define a React component inside another, React would create such
 // components as new on each re-render hindering optimizations
-const ShowLoading = (): JSX.Element => {
+const ShowLoading = (): React.JSX.Element => {
   return (
     <>
       <Box style={{ fontSize: "1.1em", color: "grey" }}>
