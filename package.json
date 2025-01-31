@@ -1,27 +1,19 @@
 {
   "name": "suvapp",
   "homepage": ".",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
   "type": "module",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/material": "^6.3.1",
-    "@types/node": "^22.10.5",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react-swc": "^3.7.2",
-    "crypto-hash": "^3.1.0",
-    "plotly.js": "^2.35.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@mui/material": "^6.4.2",
+    "plotly.js": "^3.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
     "react-plotly.js": "^2.6.0",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.7",
-    "vite-plugin-svgr": "^4.3.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite": "^6.0.11"
   },
   "scripts": {
     "start": "vite",
@@ -46,9 +38,17 @@
     ]
   },
   "devDependencies": {
-    "@types/plotly.js": "^2.35.1",
+    "@types/node": "^22.12.0",
+    "@types/plotly.js": "^2.35.2",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
     "@types/react-plotly.js": "^2.6.3",
-    "cypress": "^13.17.0",
-    "vite-plugin-bundle-prefetch": "^0.0.4"
+    "@vitejs/plugin-react-swc": "^3.7.2",
+    "crypto-hash": "^3.1.0",
+    "cypress": "^14.0.1",
+    "typescript": "^5.7.3",
+    "vite-plugin-bundle-prefetch": "^0.0.4",
+    "vite-plugin-svgr": "^4.3.0",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

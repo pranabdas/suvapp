@@ -51,7 +51,7 @@ function Plot3dSurface({
   data: number[][];
   selectedCol: { [key: string]: string };
   isYScaleLog: boolean;
-}): JSX.Element {
+}): React.JSX.Element {
   const Plot = createPlotlyComponent(Plotly);
   let xData: number[] = [];
   let yData: number[] = [];
