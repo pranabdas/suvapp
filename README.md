@@ -19,7 +19,7 @@ select) your data file, the app will guide you through its steps (i.e., select
 scan number → select columns that you want to export etc.). Once you have set
 all necessary options, click the **Process data** button, and you will be
 presented with output data table. You can also view plot of your data (`x` vs
-`y` column). If you data resembles 2-dimensional map data, the app can produce
+`y` column). If your data resemble 2-dimensional map data, the app can produce
 3D surface plot along with 2D contours for quick visualization. A sample data
 file is available [here](https://suv.netlify.app/data.txt).
 
