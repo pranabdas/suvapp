@@ -1,8 +1,8 @@
 #!/bin/bash
 # https://github.com/plotly/plotly.js/blob/master/CUSTOM_BUNDLE.md
 CWD=${PWD}
-npm i
-git clone --branch v3.0.1 --depth 1 https://github.com/plotly/plotly.js.git
+npm i --legacy-peer-deps
+git clone --branch v3.1.0-rc.0 --depth 1 https://github.com/plotly/plotly.js.git
 cd plotly.js
 npm i
 npm run custom-bundle -- --out suv --traces scatter,surface,contour --strict

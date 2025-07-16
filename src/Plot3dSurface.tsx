@@ -117,7 +117,7 @@ function Plot3dSurface({
   ];
 
   const layout: Partial<Layout> = {
-    title: "3D surface plot",
+    title: { text: "3D surface plot" },
     scene: {
       xaxis: { title: { text: xCol } },
       yaxis: { title: { text: yCol } },
@@ -136,7 +136,7 @@ function Plot3dSurface({
   };
 
   const layoutContour: Partial<LayoutContour> = {
-    title: "Contour plot",
+    title: { text: "Contour plot" },
     xaxis: { title: { text: xCol } },
     yaxis: { title: { text: yCol } },
     zaxis: { title: { text: zCol } },
