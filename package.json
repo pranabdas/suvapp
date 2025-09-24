@@ -45,7 +45,7 @@
     "@types/react-plotly.js": "^2.6.3",
     "@vitejs/plugin-react-swc": "^4.1.0",
     "crypto-hash": "^4.0.0",
-    "cypress": "^15.2.0",
+    "cypress": "^15.3.0",
     "typescript": "^5.9.2",
     "vite-plugin-bundle-prefetch": "^0.0.4",
     "vite-plugin-svgr": "^4.5.0",
