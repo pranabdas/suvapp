@@ -279,14 +279,6 @@ function App(): React.JSX.Element {
   const handleIsYScaleLog = (e: React.ChangeEvent<HTMLInputElement>) => {
     setYScaleLog(e.target.checked);
 
-    // setting showPlot to false and then immediately to true in order to force
-    // rerender the PlotComponent, otherwise sometimes the footer is hidden
-    // behind the plot.
-    setShowPlot(false);
-    setTimeout(() => {
-      setShowPlot(true);
-    }, 10);
-
     // without setTimeout scrollIntoView seems not working
     setTimeout(() => {
       plotRef.current!.scrollIntoView({ behavior: "smooth" });
