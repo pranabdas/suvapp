@@ -38,9 +38,9 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^24.6.2",
+    "@types/node": "^24.7.0",
     "@types/plotly.js": "^3.0.6",
-    "@types/react": "^19.2.0",
+    "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.0",
     "@types/react-plotly.js": "^2.6.3",
     "@vitejs/plugin-react-swc": "^4.1.0",
