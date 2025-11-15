@@ -2,7 +2,7 @@
   command = """
   bash plotly-custom-build.sh
   npm run build
-  bash set_headers.sh
+  bash set-headers.sh
   """
 
   publish = "dist"
