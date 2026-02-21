@@ -42,7 +42,7 @@ jobs:
           node-version: "lts/*"
 
       - name: Cypress run
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           browser: ${{ matrix.browser }}
           install-command: bash plotly-custom-build.sh
