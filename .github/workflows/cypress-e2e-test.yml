@@ -34,15 +34,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Prepare Node environment
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: "lts/*"
 
       - name: Cypress run
-        uses: cypress-io/github-action@v7
+        uses: cypress-io/github-action@v7.1.9
         with:
           browser: ${{ matrix.browser }}
           install-command: bash plotly-custom-build.sh
