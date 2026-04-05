@@ -1,5 +1,7 @@
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
-import createPlotlyComponent from "react-plotly.js/factory";
+import createPlotlyComponentFactory from "react-plotly.js/factory";
+const createPlotlyComponent =
+  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
 import { Data, Layout } from "plotly.js";
 
 function PlotComponent({

@@ -1,5 +1,7 @@
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
-import createPlotlyComponent from "react-plotly.js/factory";
+import createPlotlyComponentFactory from "react-plotly.js/factory";
+const createPlotlyComponent =
+  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
 import { Data, PlotData, Layout, Font } from "plotly.js";
 
 interface SurfacePlotData extends PlotData {
