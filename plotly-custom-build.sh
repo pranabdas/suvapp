@@ -1,6 +1,5 @@
 #!/bin/bash
 # https://github.com/plotly/plotly.js/blob/master/CUSTOM_BUNDLE.md
-CWD=${PWD}
 npm i
 PLOTLY_VERSION=$( jq -r '.dependencies["plotly.js"]' package.json | sed 's/[^0-9\.]*//g' )
 echo -e "\033[36m==> Bundling plotly version \033[0m\033[1m${PLOTLY_VERSION}\033[0m"
@@ -11,5 +10,5 @@ npm run custom-bundle -- --out suv --traces scatter,surface,contour --strict
 sed -i.bak '/^[[:space:]]*\/\//d' dist/plotly-suv.min.js
 sed -i.bak '/^[[:space:]]*$/d' dist/plotly-suv.min.js
 cp dist/plotly-suv.min.js ../node_modules/plotly.js/dist/plotly-suv.min.js
-cd ${CWD}
+cd ..
 rm -rf plotly.js
