@@ -326,12 +326,30 @@ describe("SUVApp - SPEC-FOURC Data Explorer", () => {
     });
 
     it("should copy data to clipboard", () => {
+      // Apply permissions ONLY for this test if running on Chrome/Chromium
+      if (Cypress.isBrowser({ family: 'chromium' })) {
+        cy.wrap(
+          Cypress.automation('remote:debugger:protocol', {
+            command: 'Browser.grantPermissions',
+            params: {
+              permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+              origin: Cypress.config('baseUrl') || window.location.origin,
+            },
+          })
+        );
+      }
+
+      cy.window().then((win) => {
+        win.focus();
+      });
+
       cy.contains("Copy data").click();
       cy.contains("Data copied").should("be.visible");
-
-      // Verify clipboard (requires cypress-real-events or similar)
-      // For now, just verify button text changed
       cy.contains("Data copied", { timeout: 2000 }).should("exist");
+
+      cy.window().then((win) => {
+        return win.navigator.clipboard.readText();
+      }).should('not.be.empty');
     });
 
     it("should download data file", () => {

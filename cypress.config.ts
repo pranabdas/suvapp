@@ -4,12 +4,6 @@ export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       on("before:browser:launch", (browser, launchOptions) => {
-        // Handle Chromium-based browsers (Chrome, Edge, etc.)
-        if (browser.family === "chromium" && browser.name !== "electron") {
-          launchOptions.preferences.default = launchOptions.preferences.default || {};
-          launchOptions.preferences.default["profile.managed_default_content_settings.clipboard"] = 1;
-        }
-
         // Handle Firefox
         if (browser.family === "firefox") {
           // launchOptions.preferences is a map of preference names to values
