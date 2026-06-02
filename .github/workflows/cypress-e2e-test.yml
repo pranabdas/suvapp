@@ -41,6 +41,10 @@ jobs:
         with:
           node-version: "lts/*"
 
+      - name: Clear npm cache (Windows)
+        if: runner.os == 'Windows'
+        run: npm cache clean --force
+
       - name: Cypress run
         uses: cypress-io/github-action@948d67d3074f1bbb6379c8bdbb04e95d2f8e593f # v7.4.0
         with:
