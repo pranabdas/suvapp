@@ -569,7 +569,9 @@ function App(): React.JSX.Element {
             <Checkbox
               checked={isYbyZ}
               onChange={handleYbyZ}
-              inputProps={{ "aria-label": "controlled" }}
+              slotProps={{
+                input: { 'aria-label': 'controlled' },
+              }}
             />
             I want to export <code>Y/Z</code>, instead of <code>Y</code> and{" "}
             <code>Z</code> columns separately.
@@ -623,7 +625,9 @@ function App(): React.JSX.Element {
                   <Checkbox
                     checked={isYScaleLog}
                     onChange={handleIsYScaleLog}
-                    inputProps={{ "aria-label": "controlled" }}
+                  slotProps={{
+                    input: { 'aria-label': 'controlled' },
+                  }}
                   />
                   Plot Z-axis in logarithmic scale.
                 </p>
@@ -639,7 +643,9 @@ function App(): React.JSX.Element {
                   <Checkbox
                     checked={isYScaleLog}
                     onChange={handleIsYScaleLog}
-                    inputProps={{ "aria-label": "controlled" }}
+                    slotProps={{
+                      input: { 'aria-label': 'controlled' },
+                    }}
                   />
                   Plot Y-axis in logarithmic scale.
                 </p>

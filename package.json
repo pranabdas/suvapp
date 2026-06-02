@@ -7,17 +7,18 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.9",
-    "plotly.js": "^3.5.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "@mui/material": "^9.0.1",
+    "plotly.js": "^3.6.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "react-dropzone": "^15.0.0",
     "react-plotly.js": "^2.6.0"
   },
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "test": "cypress open"
   },
   "eslintConfig": {
     "extends": [
@@ -37,16 +38,16 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.9.1",
     "@types/plotly.js": "^3.0.10",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@types/react-plotly.js": "^2.6.4",
-    "@vitejs/plugin-react-swc": "^4.3.0",
+    "@vitejs/plugin-react-swc": "^4.3.1",
     "crypto-hash": "^4.0.1",
-    "cypress": "^15.13.0",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.3",
+    "cypress": "^15.16.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
     "vite-plugin-bundle-prefetch": "^0.0.4"
   }
 }
