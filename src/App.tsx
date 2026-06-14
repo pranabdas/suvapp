@@ -50,7 +50,7 @@ function App(): React.JSX.Element {
       reader.onload = async () => {
         const text = reader.result?.toString();
         if (text !== undefined) {
-          // crypto-hash has issues on older firefox, use only in development
+          // crypto-hash has issues in older versions of firefox
           if (import.meta.env.DEV) {
             setSHA256(await sha256(text));
           }
