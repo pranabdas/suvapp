@@ -1,11 +1,11 @@
 function RenderTable({ data }: { data: number[][] }): React.JSX.Element {
   return (
     <>
-      {data.map((row, key) => (
-        <tr key={key}>
-          {row.map((value, index) => (
-            <td key={index}>
-              <code>{value}</code>
+      {data.map((row, idx) => (
+        <tr key={idx}>
+          {row.map((col, idy) => (
+            <td key={idy}>
+              <code>{col}</code>
             </td>
           ))}
         </tr>
