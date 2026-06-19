@@ -1,7 +1,5 @@
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
-const createPlotlyComponent =
-  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
 import { Data, PlotData, Layout, Font } from "plotly.js";
 
 interface SurfacePlotData extends PlotData {
@@ -54,7 +52,7 @@ function Plot3dSurface({
   selectedCol: { [key: string]: string };
   isYScaleLog: boolean;
 }): React.JSX.Element {
-  const Plot = createPlotlyComponent(Plotly);
+  const Plot = createPlotlyComponentFactory(Plotly);
   let xData: number[] = [];
   let yData: number[] = [];
   let zData: number[] = [];

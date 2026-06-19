@@ -1,7 +1,5 @@
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
-const createPlotlyComponent =
-  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
 import { Data, Layout } from "plotly.js";
 
 function PlotComponent({
@@ -20,7 +18,7 @@ function PlotComponent({
   // practices. At the moment defining Plot component outside of Plot3dSurface
   // creates some UI glitch. Defining it inside means Plot is a new component on
   // every re-render, this avoids the problem but sacrifices react optimizations.
-  const Plot = createPlotlyComponent(Plotly);
+  const Plot = createPlotlyComponentFactory(Plotly);
   let xData: number[] = [];
   let yData: number[] = [];
 
