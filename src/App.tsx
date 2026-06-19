@@ -38,8 +38,8 @@ function App(): React.JSX.Element {
   const [is3dSurface, set3dSurface] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const [SHA256, setSHA256] = useState("");
-  const plotRef = useRef<null | HTMLElement>(null);
-  const demoRef = useRef<null | HTMLElement>(null);
+  const plotRef = useRef<HTMLDivElement>(null);
+  const demoRef = useRef<HTMLDivElement>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     acceptedFiles.forEach((file) => {
@@ -200,7 +200,7 @@ function App(): React.JSX.Element {
           tmpData.push([
             parseFloat(fullData[ii][xColIndex]),
             parseFloat(fullData[ii][yColIndex]) /
-              parseFloat(fullData[ii][zColIndex]),
+            parseFloat(fullData[ii][zColIndex]),
           ]);
         }
       } else if (!isYbyZ && selectedCol.zCol !== "") {
@@ -281,7 +281,7 @@ function App(): React.JSX.Element {
 
     // without setTimeout scrollIntoView seems not working
     setTimeout(() => {
-      plotRef.current!.scrollIntoView({ behavior: "smooth" });
+      plotRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 200);
   };
 
@@ -292,7 +292,7 @@ function App(): React.JSX.Element {
     }
 
     setTimeout(() => {
-      plotRef.current!.scrollIntoView({ behavior: "smooth" });
+      plotRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 10);
   };
 
@@ -413,7 +413,7 @@ function App(): React.JSX.Element {
 
         {filename === "" && (
           <div
-            ref={demoRef as React.RefObject<HTMLDivElement>}
+            ref={demoRef}
             style={{ textAlign: "center" }}
           >
             <button
@@ -431,7 +431,7 @@ function App(): React.JSX.Element {
                 alt="Demo"
                 width={"100%"}
                 onLoad={() => {
-                  demoRef.current!.scrollIntoView({ behavior: "smooth" });
+                  demoRef.current?.scrollIntoView({ behavior: "smooth" });
                 }}
               />
             )}
@@ -617,7 +617,7 @@ function App(): React.JSX.Element {
           </>
         )}
 
-        <div ref={plotRef as React.RefObject<HTMLDivElement>}>
+        <div ref={plotRef}>
           {showPlot &&
             (is3dSurface ? (
               <Suspense fallback={<ShowLoading />}>
@@ -625,9 +625,9 @@ function App(): React.JSX.Element {
                   <Checkbox
                     checked={isYScaleLog}
                     onChange={handleIsYScaleLog}
-                  slotProps={{
-                    input: { 'aria-label': 'controlled' },
-                  }}
+                    slotProps={{
+                      input: { 'aria-label': 'controlled' },
+                    }}
                   />
                   Plot Z-axis in logarithmic scale.
                 </p>
