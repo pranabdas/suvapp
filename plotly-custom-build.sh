@@ -6,6 +6,8 @@ echo -e "\033[36m==> Bundling plotly version \033[0m\033[1m${PLOTLY_VERSION}\033
 git clone --branch v${PLOTLY_VERSION} --depth 1 https://github.com/plotly/plotly.js.git
 cd plotly.js
 npm i
+# This overwrites the library with an empty mock to save a few KB
+echo 'module.exports = { instance: function() { return {}; } };' > node_modules/world-calendars/index.js
 npm run custom-bundle -- --out suv --traces scatter,surface,contour --strict
 sed -i.bak '/^[[:space:]]*\/\//d' dist/plotly-suv.min.js
 sed -i.bak '/^[[:space:]]*$/d' dist/plotly-suv.min.js
