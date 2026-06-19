@@ -9,7 +9,6 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
-import { sha256 } from "crypto-hash";
 import RenderTable from "./RenderTable";
 import Footer from "./Footer";
 import ConsoleTests from "./ConsoleTests";
@@ -52,6 +51,7 @@ function App(): React.JSX.Element {
         if (text !== undefined) {
           // crypto-hash has issues in older versions of firefox
           if (import.meta.env.DEV) {
+            const { sha256 } = await import("crypto-hash");
             setSHA256(await sha256(text));
           }
           content = splitByLineBreaks(text);
