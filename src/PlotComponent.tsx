@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
 import { Data, Layout } from "plotly.js";
@@ -19,13 +20,15 @@ function PlotComponent({
   // creates some UI glitch. Defining it inside means Plot is a new component on
   // every re-render, this avoids the problem but sacrifices react optimizations.
   const Plot = createPlotlyComponentFactory(Plotly);
-  let xData: number[] = [];
-  let yData: number[] = [];
-
-  data.forEach((row) => {
-    xData.push(row[0]);
-    yData.push(row[1]);
-  });
+  const { xData, yData } = useMemo(() => {
+    const x: number[] = [];
+    const y: number[] = [];
+    data.forEach((row) => {
+      x.push(row[0]);
+      y.push(row[1]);
+    });
+    return { xData: x, yData: y };
+  }, [data]);
 
   const xLabel = selectedCol.xCol;
   let yLabel = "Y-data";
