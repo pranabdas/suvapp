@@ -18,7 +18,6 @@ const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
 function App(): React.JSX.Element {
   const [filename, setFilename] = useState("");
-  const [content, setContent] = useState<string[]>([]);
   const [scan, setScan] = useState<number[]>([]);
   const [scanLine, setScanLine] = useState<number[]>([]);
   const [selectedScan, setSelectedScan] = useState<number | null>(null);
@@ -37,6 +36,7 @@ function App(): React.JSX.Element {
   const [is3dSurface, set3dSurface] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const [SHA256, setSHA256] = useState("");
+  const contentRef = useRef<string[]>([]);
   const plotRef = useRef<HTMLDivElement>(null);
   const demoRef = useRef<HTMLDivElement>(null);
 
@@ -45,7 +45,6 @@ function App(): React.JSX.Element {
       const reader = new FileReader();
       reader.readAsText(file);
 
-      let content: string[];
       reader.onload = async () => {
         const text = reader.result?.toString();
         if (text !== undefined) {
@@ -54,16 +53,15 @@ function App(): React.JSX.Element {
             const { sha256 } = await import("crypto-hash");
             setSHA256(await sha256(text));
           }
-          content = splitByLineBreaks(text);
-          setContent(content);
+          contentRef.current = splitByLineBreaks(text);
         }
 
         let tmpScan: number[] = [];
         let scanLine: number[] = [];
 
-        for (let ii = 0; ii < content.length; ii++) {
-          if (splitByWhiteSpaces(content[ii])[0] === "#S") {
-            let tmpContent = splitByWhiteSpaces(content[ii]);
+        for (let ii = 0; ii < contentRef.current.length; ii++) {
+          if (splitByWhiteSpaces(contentRef.current[ii])[0] === "#S") {
+            let tmpContent = splitByWhiteSpaces(contentRef.current[ii]);
             tmpContent.filter((x: string) => x);
             let scanNumber = parseInt(tmpContent[1]);
             if (!isNaN(scanNumber)) {
@@ -103,15 +101,15 @@ function App(): React.JSX.Element {
 
     let lineEnd: number;
     if (selectedScanIndex === scan.length - 1) {
-      lineEnd = content.length;
+      lineEnd = contentRef.current.length;
     } else {
       lineEnd = scanLine[selectedScanIndex + 1];
     }
 
     let tmpColNames: string[] = [];
     for (let ii = lineStart; ii < lineEnd; ii++) {
-      if (content[ii].trim().slice(0, 2) === "#L") {
-        tmpColNames = splitByWhiteSpaces(content[ii]);
+      if (contentRef.current[ii].trim().slice(0, 2) === "#L") {
+        tmpColNames = splitByWhiteSpaces(contentRef.current[ii]);
         tmpColNames = tmpColNames.filter((x) => x); // not necessary as
         // splitByWhiteSpaces would eliminate any empty values
         tmpColNames.shift();
@@ -124,8 +122,8 @@ function App(): React.JSX.Element {
       let singleDataRow: string[] = [];
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
-        if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
-          singleDataRow = splitByWhiteSpaces(content[ii]);
+        if (contentRef.current[ii].trim()[0] !== "#" && contentRef.current[ii].trim()) {
+          singleDataRow = splitByWhiteSpaces(contentRef.current[ii]);
           singleDataRow = singleDataRow.filter((x) => x);
           break;
         }
@@ -168,7 +166,7 @@ function App(): React.JSX.Element {
 
       let lineEnd: number;
       if (selectedScanIndex === scan.length - 1) {
-        lineEnd = content.length;
+        lineEnd = contentRef.current.length;
       } else {
         lineEnd = scanLine[selectedScanIndex + 1] - 1;
       }
@@ -178,8 +176,8 @@ function App(): React.JSX.Element {
       let tmpData: number[][] = [];
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
-        if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
-          lineData = splitByWhiteSpaces(content[ii]);
+        if (contentRef.current[ii].trim()[0] !== "#" && contentRef.current[ii].trim()) {
+          lineData = splitByWhiteSpaces(contentRef.current[ii]);
           lineData = lineData.filter((x) => x);
           fullData.push(lineData);
         }
