@@ -297,6 +297,10 @@ function App(): React.JSX.Element {
 
   const saveData = () => {
     let outFilename;
+
+    // Guard against empty data
+    if (data.length === 0) return;
+
     const dim = data[0].length;
 
     if (
@@ -309,19 +313,10 @@ function App(): React.JSX.Element {
       outFilename = filename + "_scan_";
     }
 
-    let downloadContent = "";
-
-    for (let ii = 0; ii < data.length; ii++) {
-      if (dim === 2) {
-        downloadContent = downloadContent.concat(
-          `${data[ii][0]}\t${data[ii][1]}\r\n`
-        );
-      } else if (dim === 3) {
-        downloadContent = downloadContent.concat(
-          `${data[ii][0]}\t${data[ii][1]}\t${data[ii][2]}\r\n`
-        );
-      }
-    }
+    // O(N) array map and join is significantly faster than string concatenation in a loop
+    const downloadContent = data.map(row =>
+      dim === 2 ? `${row[0]}\t${row[1]}` : `${row[0]}\t${row[1]}\t${row[2]}`
+    ).join('\r\n') + '\r\n';
 
     const element = document.createElement("a");
     const file = new Blob([downloadContent], { type: "text/plain" });
@@ -329,6 +324,10 @@ function App(): React.JSX.Element {
     element.download = outFilename + selectedScan + ".txt";
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
+
+    // Clean up the DOM and ObjectURL to prevent memory leaks
+    document.body.removeChild(element);
+    URL.revokeObjectURL(element.href);
   };
 
   const copyData = () => {
@@ -339,21 +338,13 @@ function App(): React.JSX.Element {
       setShowCopied(false);
     }, 1500);
 
-    const dim = data[0].length;
     if (data.length > 0) {
-      let dataContent = "";
+      const dim = data[0].length;
+      // Map the array and join it instantly
+      const dataContent = data.map(row =>
+        dim === 2 ? `${row[0]}\t${row[1]}` : `${row[0]}\t${row[1]}\t${row[2]}`
+      ).join('\r\n') + '\r\n';
 
-      for (let ii = 0; ii < data.length; ii++) {
-        if (dim === 2) {
-          dataContent = dataContent.concat(
-            `${data[ii][0]}\t${data[ii][1]}\r\n`
-          );
-        } else if (dim === 3) {
-          dataContent = dataContent.concat(
-            `${data[ii][0]}\t${data[ii][1]}\t${data[ii][2]}\r\n`
-          );
-        }
-      }
       navigator.clipboard.writeText(dataContent);
       setShowCopied(true);
     } else {
