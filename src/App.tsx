@@ -229,14 +229,10 @@ function App(): React.JSX.Element {
           zCol.push(row[2]);
         });
 
-        const xColUniq = xCol.filter(
-          (value, index, self) => self.indexOf(value) === index
-        );
-        const yColUniq = yCol.filter(
-          (value, index, self) => self.indexOf(value) === index
-        );
+        const xColUniq = new Set(xCol);
+        const yColUniq = new Set(yCol);
 
-        if (xColUniq.length * yColUniq.length === zCol.length) {
+        if (xColUniq.size * yColUniq.size === zCol.length) {
           set3dSurface(true);
         } else {
           set3dSurface(false);
