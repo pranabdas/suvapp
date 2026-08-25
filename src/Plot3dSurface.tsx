@@ -1,12 +1,15 @@
 import { useMemo } from "react";
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
-import { Data, PlotData, Layout, Font } from "plotly.js";
+import { Data, Layout, Font } from "plotly.js";
 
-interface SurfacePlotData extends PlotData {
+type BaseTrace = Extract<Data, { type?: string }>;
+
+interface SurfacePlotData extends BaseTrace {
+  type: "surface";
   // https://plotly.com/javascript/reference/surface/#surface-contours
   // https://github.com/DefinitelyTyped/DefinitelyTyped/commit/f8f22d2d8d29bd896ff3e632262b84fb5fedd6e4
-  contours: Partial<{
+  contours?: Partial<{
     coloring: "fill" | "heatmap" | "lines" | "none";
     end: number;
     labelfont: Partial<Font>;
@@ -32,11 +35,11 @@ interface SurfacePlotData extends PlotData {
     type: "levels" | "constraint";
     value: number | [lowerBound: number, upperBound: number];
     // https://plotly.com/javascript/reference/surface/#surface-contours-z
-    z: {
+    z: Partial<{
       show: boolean;
       usecolormap: boolean;
-      project: { z: boolean };
-    };
+      project: Partial<{ z: boolean }>;
+    }>;
   }>;
 }
 
@@ -92,7 +95,7 @@ function Plot3dSurface({
 
   const { xCol, yCol, zCol } = selectedCol;
 
-  const trace: Partial<SurfacePlotData>[] = [
+  const trace: Data[] = [
     {
       x: xDataUniq,
       y: yDataUniq,
@@ -106,7 +109,7 @@ function Plot3dSurface({
           project: { z: true },
         },
       },
-    },
+    } as SurfacePlotData,
   ];
 
   const contour: Data[] = [
