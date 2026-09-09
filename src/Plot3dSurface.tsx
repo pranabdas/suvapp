@@ -5,7 +5,7 @@ import { Data, Layout, Font } from "plotly.js";
 
 type BaseTrace = Extract<Data, { type?: string }>;
 
-interface SurfacePlotData extends BaseTrace {
+type SurfacePlotData = BaseTrace & {
   type: "surface";
   // https://plotly.com/javascript/reference/surface/#surface-contours
   // https://github.com/DefinitelyTyped/DefinitelyTyped/commit/f8f22d2d8d29bd896ff3e632262b84fb5fedd6e4
