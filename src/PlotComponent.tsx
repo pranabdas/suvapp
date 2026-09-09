@@ -1,7 +1,6 @@
+import { useMemo } from "react";
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
-const createPlotlyComponent =
-  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
 import { Data, Layout } from "plotly.js";
 
 function PlotComponent({
@@ -20,14 +19,16 @@ function PlotComponent({
   // practices. At the moment defining Plot component outside of Plot3dSurface
   // creates some UI glitch. Defining it inside means Plot is a new component on
   // every re-render, this avoids the problem but sacrifices react optimizations.
-  const Plot = createPlotlyComponent(Plotly);
-  let xData: number[] = [];
-  let yData: number[] = [];
-
-  data.forEach((row) => {
-    xData.push(row[0]);
-    yData.push(row[1]);
-  });
+  const Plot = createPlotlyComponentFactory(Plotly);
+  const { xData, yData } = useMemo(() => {
+    const x: number[] = [];
+    const y: number[] = [];
+    data.forEach((row) => {
+      x.push(row[0]);
+      y.push(row[1]);
+    });
+    return { xData: x, yData: y };
+  }, [data]);
 
   const xLabel = selectedCol.xCol;
   let yLabel = "Y-data";

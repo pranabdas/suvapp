@@ -9,4 +9,18 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(pkg) {
+          if (pkg.includes('plotly.js') || pkg.includes('react-plotly.js')) {
+            return 'plotly';
+          }
+          if (pkg.includes('@mui/material') || pkg.includes('@emotion')) {
+            return 'mui';
+          }
+        }
+      }
+    }
+  }
 });
