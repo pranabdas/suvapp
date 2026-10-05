@@ -9,7 +9,6 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
-import { sha256 } from "crypto-hash";
 import RenderTable from "./RenderTable";
 import Footer from "./Footer";
 import ConsoleTests from "./ConsoleTests";
@@ -19,7 +18,6 @@ const Plot3dSurface = lazy(() => import("./Plot3dSurface"));
 
 function App(): React.JSX.Element {
   const [filename, setFilename] = useState("");
-  const [content, setContent] = useState<string[]>([]);
   const [scan, setScan] = useState<number[]>([]);
   const [scanLine, setScanLine] = useState<number[]>([]);
   const [selectedScan, setSelectedScan] = useState<number | null>(null);
@@ -38,32 +36,32 @@ function App(): React.JSX.Element {
   const [is3dSurface, set3dSurface] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const [SHA256, setSHA256] = useState("");
-  const plotRef = useRef<null | HTMLElement>(null);
-  const demoRef = useRef<null | HTMLElement>(null);
+  const contentRef = useRef<string[]>([]);
+  const plotRef = useRef<HTMLDivElement>(null);
+  const demoRef = useRef<HTMLDivElement>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.readAsText(file);
 
-      let content: string[];
       reader.onload = async () => {
         const text = reader.result?.toString();
         if (text !== undefined) {
-          // crypto-hash has issues on older firefox, use only in development
+          // crypto-hash has issues in older versions of firefox
           if (import.meta.env.DEV) {
+            const { sha256 } = await import("crypto-hash");
             setSHA256(await sha256(text));
           }
-          content = splitByLineBreaks(text);
-          setContent(content);
+          contentRef.current = splitByLineBreaks(text);
         }
 
         let tmpScan: number[] = [];
         let scanLine: number[] = [];
 
-        for (let ii = 0; ii < content.length; ii++) {
-          if (splitByWhiteSpaces(content[ii])[0] === "#S") {
-            let tmpContent = splitByWhiteSpaces(content[ii]);
+        for (let ii = 0; ii < contentRef.current.length; ii++) {
+          if (splitByWhiteSpaces(contentRef.current[ii])[0] === "#S") {
+            let tmpContent = splitByWhiteSpaces(contentRef.current[ii]);
             tmpContent.filter((x: string) => x);
             let scanNumber = parseInt(tmpContent[1]);
             if (!isNaN(scanNumber)) {
@@ -103,15 +101,15 @@ function App(): React.JSX.Element {
 
     let lineEnd: number;
     if (selectedScanIndex === scan.length - 1) {
-      lineEnd = content.length;
+      lineEnd = contentRef.current.length;
     } else {
       lineEnd = scanLine[selectedScanIndex + 1];
     }
 
     let tmpColNames: string[] = [];
     for (let ii = lineStart; ii < lineEnd; ii++) {
-      if (content[ii].trim().slice(0, 2) === "#L") {
-        tmpColNames = splitByWhiteSpaces(content[ii]);
+      if (contentRef.current[ii].trim().slice(0, 2) === "#L") {
+        tmpColNames = splitByWhiteSpaces(contentRef.current[ii]);
         tmpColNames = tmpColNames.filter((x) => x); // not necessary as
         // splitByWhiteSpaces would eliminate any empty values
         tmpColNames.shift();
@@ -124,8 +122,8 @@ function App(): React.JSX.Element {
       let singleDataRow: string[] = [];
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
-        if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
-          singleDataRow = splitByWhiteSpaces(content[ii]);
+        if (contentRef.current[ii].trim()[0] !== "#" && contentRef.current[ii].trim()) {
+          singleDataRow = splitByWhiteSpaces(contentRef.current[ii]);
           singleDataRow = singleDataRow.filter((x) => x);
           break;
         }
@@ -168,7 +166,7 @@ function App(): React.JSX.Element {
 
       let lineEnd: number;
       if (selectedScanIndex === scan.length - 1) {
-        lineEnd = content.length;
+        lineEnd = contentRef.current.length;
       } else {
         lineEnd = scanLine[selectedScanIndex + 1] - 1;
       }
@@ -178,8 +176,8 @@ function App(): React.JSX.Element {
       let tmpData: number[][] = [];
 
       for (let ii = lineStart; ii < lineEnd; ii++) {
-        if (content[ii].trim()[0] !== "#" && content[ii].trim()) {
-          lineData = splitByWhiteSpaces(content[ii]);
+        if (contentRef.current[ii].trim()[0] !== "#" && contentRef.current[ii].trim()) {
+          lineData = splitByWhiteSpaces(contentRef.current[ii]);
           lineData = lineData.filter((x) => x);
           fullData.push(lineData);
         }
@@ -200,7 +198,7 @@ function App(): React.JSX.Element {
           tmpData.push([
             parseFloat(fullData[ii][xColIndex]),
             parseFloat(fullData[ii][yColIndex]) /
-              parseFloat(fullData[ii][zColIndex]),
+            parseFloat(fullData[ii][zColIndex]),
           ]);
         }
       } else if (!isYbyZ && selectedCol.zCol !== "") {
@@ -231,14 +229,10 @@ function App(): React.JSX.Element {
           zCol.push(row[2]);
         });
 
-        const xColUniq = xCol.filter(
-          (value, index, self) => self.indexOf(value) === index
-        );
-        const yColUniq = yCol.filter(
-          (value, index, self) => self.indexOf(value) === index
-        );
+        const xColUniq = new Set(xCol);
+        const yColUniq = new Set(yCol);
 
-        if (xColUniq.length * yColUniq.length === zCol.length) {
+        if (xColUniq.size * yColUniq.size === zCol.length) {
           set3dSurface(true);
         } else {
           set3dSurface(false);
@@ -281,7 +275,7 @@ function App(): React.JSX.Element {
 
     // without setTimeout scrollIntoView seems not working
     setTimeout(() => {
-      plotRef.current!.scrollIntoView({ behavior: "smooth" });
+      plotRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 200);
   };
 
@@ -292,7 +286,7 @@ function App(): React.JSX.Element {
     }
 
     setTimeout(() => {
-      plotRef.current!.scrollIntoView({ behavior: "smooth" });
+      plotRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 10);
   };
 
@@ -303,6 +297,10 @@ function App(): React.JSX.Element {
 
   const saveData = () => {
     let outFilename;
+
+    // Guard against empty data
+    if (data.length === 0) return;
+
     const dim = data[0].length;
 
     if (
@@ -315,19 +313,10 @@ function App(): React.JSX.Element {
       outFilename = filename + "_scan_";
     }
 
-    let downloadContent = "";
-
-    for (let ii = 0; ii < data.length; ii++) {
-      if (dim === 2) {
-        downloadContent = downloadContent.concat(
-          `${data[ii][0]}\t${data[ii][1]}\r\n`
-        );
-      } else if (dim === 3) {
-        downloadContent = downloadContent.concat(
-          `${data[ii][0]}\t${data[ii][1]}\t${data[ii][2]}\r\n`
-        );
-      }
-    }
+    // O(N) array map and join is significantly faster than string concatenation in a loop
+    const downloadContent = data.map(row =>
+      dim === 2 ? `${row[0]}\t${row[1]}` : `${row[0]}\t${row[1]}\t${row[2]}`
+    ).join('\r\n') + '\r\n';
 
     const element = document.createElement("a");
     const file = new Blob([downloadContent], { type: "text/plain" });
@@ -335,6 +324,10 @@ function App(): React.JSX.Element {
     element.download = outFilename + selectedScan + ".txt";
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
+
+    // Clean up the DOM and ObjectURL to prevent memory leaks
+    document.body.removeChild(element);
+    URL.revokeObjectURL(element.href);
   };
 
   const copyData = () => {
@@ -345,21 +338,13 @@ function App(): React.JSX.Element {
       setShowCopied(false);
     }, 1500);
 
-    const dim = data[0].length;
     if (data.length > 0) {
-      let dataContent = "";
+      const dim = data[0].length;
+      // Map the array and join it instantly
+      const dataContent = data.map(row =>
+        dim === 2 ? `${row[0]}\t${row[1]}` : `${row[0]}\t${row[1]}\t${row[2]}`
+      ).join('\r\n') + '\r\n';
 
-      for (let ii = 0; ii < data.length; ii++) {
-        if (dim === 2) {
-          dataContent = dataContent.concat(
-            `${data[ii][0]}\t${data[ii][1]}\r\n`
-          );
-        } else if (dim === 3) {
-          dataContent = dataContent.concat(
-            `${data[ii][0]}\t${data[ii][1]}\t${data[ii][2]}\r\n`
-          );
-        }
-      }
       navigator.clipboard.writeText(dataContent);
       setShowCopied(true);
     } else {
@@ -413,7 +398,7 @@ function App(): React.JSX.Element {
 
         {filename === "" && (
           <div
-            ref={demoRef as React.RefObject<HTMLDivElement>}
+            ref={demoRef}
             style={{ textAlign: "center" }}
           >
             <button
@@ -431,7 +416,7 @@ function App(): React.JSX.Element {
                 alt="Demo"
                 width={"100%"}
                 onLoad={() => {
-                  demoRef.current!.scrollIntoView({ behavior: "smooth" });
+                  demoRef.current?.scrollIntoView({ behavior: "smooth" });
                 }}
               />
             )}
@@ -617,7 +602,7 @@ function App(): React.JSX.Element {
           </>
         )}
 
-        <div ref={plotRef as React.RefObject<HTMLDivElement>}>
+        <div ref={plotRef}>
           {showPlot &&
             (is3dSurface ? (
               <Suspense fallback={<ShowLoading />}>
@@ -625,9 +610,9 @@ function App(): React.JSX.Element {
                   <Checkbox
                     checked={isYScaleLog}
                     onChange={handleIsYScaleLog}
-                  slotProps={{
-                    input: { 'aria-label': 'controlled' },
-                  }}
+                    slotProps={{
+                      input: { 'aria-label': 'controlled' },
+                    }}
                   />
                   Plot Z-axis in logarithmic scale.
                 </p>
