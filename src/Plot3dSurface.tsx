@@ -16,11 +16,28 @@ function Plot3dSurface({
     const yData: number[] = [];
     const zData: number[] = [];
 
-    // extract raw columns
+    // log10(0) is -Infinity, which the contour trace draws as a gap.
+    // Floor those readings at the smallest positive Z. This array is only
+    // passed to Plotly; save and copy still use the original values.
+    let logFloor = Number.NaN;
+    if (isYScaleLog) {
+      let minPositive = Number.POSITIVE_INFINITY;
+      for (const row of data) {
+        if (row[2] > 0 && row[2] < minPositive) minPositive = row[2];
+      }
+      if (Number.isFinite(minPositive)) logFloor = Math.log10(minPositive);
+    }
+
     data.forEach((row) => {
       xData.push(row[0]);
       yData.push(row[1]);
-      zData.push(isYScaleLog ? Math.log10(row[2]) : row[2]);
+      if (!isYScaleLog) {
+        zData.push(row[2]);
+      } else if (row[2] > 0) {
+        zData.push(Math.log10(row[2]));
+      } else {
+        zData.push(logFloor);
+      }
     });
 
     // fast O(N) unique array generation using Set
