@@ -17,6 +17,15 @@ if ! grep -q "world-calendars/dist/calendars/" "$CALENDARS"; then
 fi
 sed -i.bak "/world-calendars\/dist\/calendars\//d" "$CALENDARS"
 
+# registry.js requires the MapLibre stylesheet inside a map-only branch, but
+# the bundler still inlines that CSS. This bundle has no map traces.
+REGISTRY=src/registry.js
+if ! grep -q "maplibre-gl/dist/maplibre-gl.css" "$REGISTRY"; then
+  echo "expected MapLibre CSS require in $REGISTRY" >&2
+  exit 1
+fi
+sed -i.bak "/maplibre-gl\/dist\/maplibre-gl.css/d" "$REGISTRY"
+
 npm run custom-bundle -- --out suv --traces scatter,surface,contour --strict
 sed -i.bak '/^[[:space:]]*\/\//d' dist/plotly-suv.min.js
 sed -i.bak '/^[[:space:]]*$/d' dist/plotly-suv.min.js
