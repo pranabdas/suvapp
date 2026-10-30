@@ -1,47 +1,7 @@
 import { useMemo } from "react";
 import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
-import { Data, Layout, Font } from "plotly.js";
-
-type BaseTrace = Extract<Data, { type?: string }>;
-
-type SurfacePlotData = BaseTrace & {
-  type: "surface";
-  // https://plotly.com/javascript/reference/surface/#surface-contours
-  // https://github.com/DefinitelyTyped/DefinitelyTyped/commit/f8f22d2d8d29bd896ff3e632262b84fb5fedd6e4
-  contours?: Partial<{
-    coloring: "fill" | "heatmap" | "lines" | "none";
-    end: number;
-    labelfont: Partial<Font>;
-    labelformat: string;
-    operation:
-    | "="
-    | "<"
-    | ">="
-    | ">"
-    | "<="
-    | "[]"
-    | "()"
-    | "[)"
-    | "(]"
-    | "]["
-    | ")("
-    | "]("
-    | ")[";
-    showlabels: boolean;
-    showlines: boolean;
-    size: number;
-    start: number;
-    type: "levels" | "constraint";
-    value: number | [lowerBound: number, upperBound: number];
-    // https://plotly.com/javascript/reference/surface/#surface-contours-z
-    z: Partial<{
-      show: boolean;
-      usecolormap: boolean;
-      project: Partial<{ z: boolean }>;
-    }>;
-  }>;
-}
+import { Data, Layout, SurfaceData } from "plotly.js";
 
 interface LayoutContour extends Layout {
   zaxis: { title: { text: string } };
@@ -95,7 +55,7 @@ function Plot3dSurface({
 
   const { xCol, yCol, zCol } = selectedCol;
 
-  const trace: Data[] = [
+  const trace: Partial<SurfaceData>[] = [
     {
       x: xDataUniq,
       y: yDataUniq,
@@ -109,7 +69,7 @@ function Plot3dSurface({
           project: { z: true },
         },
       },
-    } as SurfacePlotData,
+    },
   ];
 
   const contour: Data[] = [
