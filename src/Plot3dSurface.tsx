@@ -3,10 +3,6 @@ import Plotly from "plotly.js/dist/plotly-suv.min.js";
 import createPlotlyComponentFactory from "react-plotly.js/factory";
 import { Data, Layout, SurfaceData } from "plotly.js";
 
-interface LayoutContour extends Layout {
-  zaxis: { title: { text: string } };
-}
-
 function Plot3dSurface({
   data,
   selectedCol,
@@ -101,11 +97,10 @@ function Plot3dSurface({
     },
   };
 
-  const layoutContour: Partial<LayoutContour> = {
+  const layoutContour: Partial<Layout> = {
     title: { text: "Contour plot" },
     xaxis: { title: { text: xCol } },
     yaxis: { title: { text: yCol } },
-    zaxis: { title: { text: zCol } },
     font: { size: 14 },
     autosize: false,
     width: 600,
