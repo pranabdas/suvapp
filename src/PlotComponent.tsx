@@ -1,8 +1,10 @@
-import Plotly from "plotly.js/dist/plotly-suv.min.js";
-import createPlotlyComponentFactory from "react-plotly.js/factory";
-const createPlotlyComponent =
-  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
+import { useMemo } from "react";
 import { Data, Layout } from "plotly.js";
+import Plot, { plotConfig } from "./Plot";
+
+// with `responsive` and autosize, Plotly sizes the graph to 100% of this div
+// on updates, so the div needs its own width and height
+const plotStyle = { width: "100%", height: "450px" };
 
 function PlotComponent({
   data,
@@ -15,62 +17,42 @@ function PlotComponent({
   isYbyZ: boolean;
   isYScaleLog: boolean;
 }): React.JSX.Element {
-  // this is certainly a bad practice to define a component inside another
-  // component, however Plotly itself does not follow all the react best
-  // practices. At the moment defining Plot component outside of Plot3dSurface
-  // creates some UI glitch. Defining it inside means Plot is a new component on
-  // every re-render, this avoids the problem but sacrifices react optimizations.
-  const Plot = createPlotlyComponent(Plotly);
-  let xData: number[] = [];
-  let yData: number[] = [];
+  const yLabel =
+    selectedCol.zCol !== "" && isYbyZ
+      ? `${selectedCol.yCol} / ${selectedCol.zCol}`
+      : selectedCol.yCol;
 
-  data.forEach((row) => {
-    xData.push(row[0]);
-    yData.push(row[1]);
-  });
+  const trace = useMemo<Data[]>(() => {
+    const x: number[] = [];
+    const y: number[] = [];
+    data.forEach((row) => {
+      x.push(row[0]);
+      y.push(row[1]);
+    });
+    return [
+      {
+        x,
+        y,
+        mode: "lines",
+        type: "scatter",
+        marker: { color: "teal" },
+      },
+    ];
+  }, [data]);
 
-  const xLabel = selectedCol.xCol;
-  let yLabel = "Y-data";
-
-  if (selectedCol.zCol !== "") {
-    if (isYbyZ) {
-      yLabel = selectedCol.yCol + " / " + selectedCol.zCol;
-    } else {
-      yLabel = selectedCol.yCol;
-    }
-  } else {
-    yLabel = selectedCol.yCol;
-  }
-
-  const trace: Data[] = [
-    {
-      x: xData,
-      y: yData,
-      mode: "lines",
-      type: "scatter",
-      marker: { color: "teal" },
-    },
-  ];
-
-  let layout: Partial<Layout> = {
-    xaxis: { title: { text: xLabel } },
-    yaxis: { title: { text: yLabel } },
-    font: { size: 14 },
-  };
-
-  if (isYScaleLog) {
-    layout = {
-      ...layout,
-      yaxis: { title: { text: yLabel }, type: "log" },
-    };
-  }
+  const layout = useMemo<Partial<Layout>>(
+    () => ({
+      xaxis: { title: { text: selectedCol.xCol } },
+      yaxis: isYScaleLog
+        ? { title: { text: yLabel }, type: "log" }
+        : { title: { text: yLabel } },
+      font: { size: 14 },
+    }),
+    [selectedCol.xCol, yLabel, isYScaleLog]
+  );
 
   return (
-    <Plot
-      data={trace}
-      config={{ responsive: true, displayModeBar: true }}
-      layout={layout}
-    />
+    <Plot data={trace} config={plotConfig} layout={layout} style={plotStyle} />
   );
 }
 

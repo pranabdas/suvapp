@@ -1,49 +1,6 @@
-import Plotly from "plotly.js/dist/plotly-suv.min.js";
-import createPlotlyComponentFactory from "react-plotly.js/factory";
-const createPlotlyComponent =
-  (createPlotlyComponentFactory as any).default ?? createPlotlyComponentFactory;
-import { Data, PlotData, Layout, Font } from "plotly.js";
-
-interface SurfacePlotData extends PlotData {
-  // https://plotly.com/javascript/reference/surface/#surface-contours
-  // https://github.com/DefinitelyTyped/DefinitelyTyped/commit/f8f22d2d8d29bd896ff3e632262b84fb5fedd6e4
-  contours: Partial<{
-    coloring: "fill" | "heatmap" | "lines" | "none";
-    end: number;
-    labelfont: Partial<Font>;
-    labelformat: string;
-    operation:
-      | "="
-      | "<"
-      | ">="
-      | ">"
-      | "<="
-      | "[]"
-      | "()"
-      | "[)"
-      | "(]"
-      | "]["
-      | ")("
-      | "]("
-      | ")[";
-    showlabels: boolean;
-    showlines: boolean;
-    size: number;
-    start: number;
-    type: "levels" | "constraint";
-    value: number | [lowerBound: number, upperBound: number];
-    // https://plotly.com/javascript/reference/surface/#surface-contours-z
-    z: {
-      show: boolean;
-      usecolormap: boolean;
-      project: { z: boolean };
-    };
-  }>;
-}
-
-interface LayoutContour extends Layout {
-  zaxis: { title: { text: string } };
-}
+import { useMemo } from "react";
+import { Data, Layout, SurfaceData } from "plotly.js";
+import Plot, { plotConfig } from "./Plot";
 
 function Plot3dSurface({
   data,
@@ -54,120 +11,135 @@ function Plot3dSurface({
   selectedCol: { [key: string]: string };
   isYScaleLog: boolean;
 }): React.JSX.Element {
-  const Plot = createPlotlyComponent(Plotly);
-  let xData: number[] = [];
-  let yData: number[] = [];
-  let zData: number[] = [];
+  const { trace, contour } = useMemo(() => {
+    const xData: number[] = [];
+    const yData: number[] = [];
+    const zData: number[] = [];
 
-  data.forEach((row) => {
-    xData.push(row[0]);
-    yData.push(row[1]);
+    // log10(0) is -Infinity, which the contour trace draws as a gap.
+    // Floor those readings at the smallest positive Z. This array is only
+    // passed to Plotly; save and copy still use the original values.
+    let logFloor = Number.NaN;
     if (isYScaleLog) {
-      zData.push(Math.log10(row[2]));
-    } else {
-      zData.push(row[2]);
+      let minPositive = Number.POSITIVE_INFINITY;
+      for (const row of data) {
+        if (row[2] > 0 && row[2] < minPositive) minPositive = row[2];
+      }
+      if (Number.isFinite(minPositive)) logFloor = Math.log10(minPositive);
     }
-  });
 
-  let xDataUniq = xData.filter(
-    (value, index, self) => self.indexOf(value) === index
-  );
-  let yDataUniq = yData.filter(
-    (value, index, self) => self.indexOf(value) === index
-  );
+    data.forEach((row) => {
+      xData.push(row[0]);
+      yData.push(row[1]);
+      if (!isYScaleLog) {
+        zData.push(row[2]);
+      } else if (row[2] > 0) {
+        zData.push(Math.log10(row[2]));
+      } else {
+        zData.push(logFloor);
+      }
+    });
 
-  let zDataFinal: number[][] = [];
-  let zeros: number[] = Array(xDataUniq.length).fill(0);
+    // fast O(N) unique array generation using Set
+    const xDataUniq = Array.from(new Set(xData));
+    const yDataUniq = Array.from(new Set(yData));
 
-  for (let ii = 0; ii < yDataUniq.length; ii++) {
-    zDataFinal.push([...zeros]); // make deep copies instead of mutating
-  }
+    // create O(1) lookup maps for the indices to avoid .indexOf() in loops
+    const xIndexMap = new Map(xDataUniq.map((val, idx) => [val, idx]));
+    const yIndexMap = new Map(yDataUniq.map((val, idx) => [val, idx]));
 
-  for (let ii = 0; ii < data.length; ii++) {
-    let xIndex = xDataUniq.indexOf(xData[ii]);
-    let yIndex = yDataUniq.indexOf(yData[ii]);
-    zDataFinal[yIndex][xIndex] = zData[ii];
-  }
+    // pre-allocate the 2D Z-matrix
+    const zDataFinal: number[][] = Array(yDataUniq.length)
+      .fill(0)
+      .map(() => Array(xDataUniq.length).fill(0));
+
+    // fast O(N) matrix population
+    for (let ii = 0; ii < data.length; ii++) {
+      // instant lookup using the Maps instead of array.indexOf()
+      const xIndex = xIndexMap.get(xData[ii])!;
+      const yIndex = yIndexMap.get(yData[ii])!;
+      zDataFinal[yIndex][xIndex] = zData[ii];
+    }
+
+    const trace: Partial<SurfaceData>[] = [
+      {
+        x: xDataUniq,
+        y: yDataUniq,
+        z: zDataFinal,
+        type: "surface",
+        colorscale: "Jet",
+        contours: {
+          z: {
+            show: true,
+            usecolormap: true,
+            project: { z: true },
+          },
+        },
+      },
+    ];
+
+    const contour: Data[] = [
+      {
+        x: xDataUniq,
+        y: yDataUniq,
+        z: zDataFinal,
+        type: "contour",
+        colorscale: "Jet",
+      },
+    ];
+
+    return { trace, contour };
+  }, [data, isYScaleLog]);
 
   const { xCol, yCol, zCol } = selectedCol;
 
-  const trace: Partial<SurfacePlotData>[] = [
-    {
-      x: xDataUniq,
-      y: yDataUniq,
-      z: zDataFinal,
-      type: "surface",
-      colorscale: "Jet",
-      contours: {
-        z: {
-          show: true,
-          usecolormap: true,
-          project: { z: true },
-        },
+  const layout = useMemo<Partial<Layout>>(
+    () => ({
+      title: { text: "3D surface plot" },
+      scene: {
+        xaxis: { title: { text: xCol } },
+        yaxis: { title: { text: yCol } },
+        zaxis: { title: { text: zCol } },
       },
-    },
-  ];
+      font: { size: 14 },
+      autosize: false,
+      width: 600,
+      height: 600,
+      margin: {
+        l: 65,
+        r: 50,
+        b: 65,
+        t: 90,
+      },
+    }),
+    [xCol, yCol, zCol]
+  );
 
-  const contour: Data[] = [
-    {
-      x: xDataUniq,
-      y: yDataUniq,
-      z: zDataFinal,
-      type: "contour",
-      colorscale: "Jet",
-    },
-  ];
-
-  const layout: Partial<Layout> = {
-    title: { text: "3D surface plot" },
-    scene: {
+  const layoutContour = useMemo<Partial<Layout>>(
+    () => ({
+      title: { text: "Contour plot" },
       xaxis: { title: { text: xCol } },
       yaxis: { title: { text: yCol } },
-      zaxis: { title: { text: zCol } },
-    },
-    font: { size: 14 },
-    autosize: false,
-    width: 600,
-    height: 600,
-    margin: {
-      l: 65,
-      r: 50,
-      b: 65,
-      t: 90,
-    },
-  };
-
-  const layoutContour: Partial<LayoutContour> = {
-    title: { text: "Contour plot" },
-    xaxis: { title: { text: xCol } },
-    yaxis: { title: { text: yCol } },
-    zaxis: { title: { text: zCol } },
-    font: { size: 14 },
-    autosize: false,
-    width: 600,
-    height: 600,
-    margin: {
-      l: 65,
-      r: 50,
-      b: 65,
-      t: 90,
-    },
-  };
+      font: { size: 14 },
+      autosize: false,
+      width: 600,
+      height: 600,
+      margin: {
+        l: 65,
+        r: 50,
+        b: 65,
+        t: 90,
+      },
+    }),
+    [xCol, yCol]
+  );
 
   return (
     <>
-      <Plot
-        data={trace}
-        config={{ responsive: true, displayModeBar: true }}
-        layout={layout}
-      />
+      <Plot data={trace} config={plotConfig} layout={layout} />
 
       <br />
-      <Plot
-        data={contour}
-        config={{ responsive: true, displayModeBar: true }}
-        layout={layoutContour}
-      />
+      <Plot data={contour} config={plotConfig} layout={layoutContour} />
     </>
   );
 }

@@ -9,9 +9,9 @@
 This app can parse SPEC/FOURC formatted data, and export desired columns in
 plaintext format. Alternatively, you can copy the parsed output to clipboard,
 and directly paste in your favorite program (such as
-Origin/<wbr/>Igor/<wbr/>Excel). Basic visualization of the data is also
-available. The app is named after the SUV Beamline of Singapore Synchrotron
-Light Source.
+Origin/<wbr/>Igor/<wbr/>Excel). The app also provides built-in tools for quick
+data visualization. The app is named after the SUV Beamline of Singapore
+Synchrotron Light Source.
 
 ### Quick start
 
@@ -36,6 +36,9 @@ process data per se. However, note that not every module is loaded during the
 first page loading; they are loaded on-demand. For example, if you use the plot
 functionality, internet connectivity is necessary to dynamically load required
 modules during their first call.
+
+
+### Feedback
 
 If you spot any bug or have suggestions to improve the application, please file
 an [issue](https://github.com/pranabdas/suvapp/issues). Thank you.
