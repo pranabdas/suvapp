@@ -29,6 +29,7 @@ sed -i.bak "/maplibre-gl\/dist\/maplibre-gl.css/d" "$REGISTRY"
 npm run custom-bundle -- --out suv --traces scatter,surface,contour --strict
 sed -i.bak '/^[[:space:]]*\/\//d' dist/plotly-suv.min.js
 sed -i.bak '/^[[:space:]]*$/d' dist/plotly-suv.min.js
+node --check dist/plotly-suv.min.js
 cp dist/plotly-suv.min.js ../node_modules/plotly.js/dist/plotly-suv.min.js
 cd ..
 rm -rf plotly.js
