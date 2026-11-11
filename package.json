@@ -8,10 +8,10 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.5.0",
-    "plotly.js": "^4.2.0",
+    "plotly.js": "^4.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-dropzone": "^20.1.4",
+    "react-dropzone": "^20.2.0",
     "react-plotly.js": "^4.1.0"
   },
   "scripts": {
@@ -43,9 +43,9 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react-swc": "^4.3.3",
     "crypto-hash": "^4.0.1",
-    "cypress": "^16.2.1",
+    "cypress": "^16.3.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5",
+    "vite": "^8.3.7",
     "vite-plugin-bundle-prefetch": "^0.0.4"
   }
 }
